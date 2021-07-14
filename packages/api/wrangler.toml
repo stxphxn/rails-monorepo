@@ -1,0 +1,11 @@
+name = "api"
+type = "javascript"
+zone_id = ""
+account_id = "70b6d283d17368dca5d5613c762ffdb4"
+route = ""
+workers_dev = true
+
+[build]
+command = "npm install && npm run build"
+[build.upload]
+format = "service-worker"
