@@ -1,6 +1,6 @@
 const authToken = btoa(`${process.env.YAPILY_KEY}:${process.env.YAPILY_SECRET}`);
 
-const authCall = async (url = '', data = {}, method = 'GET'): Promise<any> => {
+const authCall = async (url: string, data = {}, method = 'GET'): Promise<any> => {
   // Default options are marked with *
   const response = await fetch(url, {
     method: method, // *GET, POST, PUT, DELETE, etc.
