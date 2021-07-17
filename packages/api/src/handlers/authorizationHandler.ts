@@ -7,15 +7,15 @@ const authorizationHandler = async (request: Request): Promise<Response> => {
     });
   }
 
-  const { applicationUserId, institutionId } = request.body;
+  const body = await request.json();
 
-  const body = {
-    applicationUserId,
-    institutionId,
+  const reqBody = {
+    applicationUserId: body.applicationUserId,
+    institutionId: body.institutionId,
     callback: "https://display-parameters.com/"
   }
 
-  const data = await authCall('https://api.yapily.com/account-auth-requests', body, 'POST');
+  const data = await authCall('https://api.yapily.com/account-auth-requests', reqBody, 'POST');
   const json = JSON.stringify(data);
 
   return new Response(json,
