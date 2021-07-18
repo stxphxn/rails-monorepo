@@ -1,6 +1,6 @@
 import authCall from "../utils/authCall";
 
-const institutionsHandler = async (request: Request): Promise<Response> => {
+const getInstitutions = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", {
       status: 405
@@ -18,4 +18,4 @@ const institutionsHandler = async (request: Request): Promise<Response> => {
     });
 };
 
-export default institutionsHandler;
+export default getInstitutions;

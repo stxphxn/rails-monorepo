@@ -1,6 +1,6 @@
 import authCall from "../utils/authCall";
 
-const getAccountsHandler = async (request: Request): Promise<Response> => {
+const getAccounts = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", {
       status: 405
@@ -18,4 +18,4 @@ const getAccountsHandler = async (request: Request): Promise<Response> => {
     });
 };
 
-export default getAccountsHandler;
+export default getAccounts;
