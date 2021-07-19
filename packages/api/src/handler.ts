@@ -12,6 +12,12 @@ export async function handleRequest(request: Request): Promise<Response> {
       return accountAuth(request);
     case '/accounts':
       return getAccounts(request);
+    case '/prepare-swap':
+      console.log('create a new trade');
+      break;
+    case '/fulfill-swap':
+      console.log('release funds if payment has been made');
+      break;
     default:
       break;
   }
