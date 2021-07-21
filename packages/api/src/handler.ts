@@ -1,6 +1,7 @@
 import institutionsHandler from "./handlers/getInstitutions";
 import getAccounts from "./handlers/getAccounts";
 import accountAuth from "./handlers/accountAuth";
+import paymentAuth from "./handlers/paymentAuth";
 
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
@@ -10,6 +11,8 @@ export async function handleRequest(request: Request): Promise<Response> {
       return institutionsHandler(request);
     case '/account-auth-request':
       return accountAuth(request);
+    case '/payment-auth-request':
+      return paymentAuth(request);
     case '/accounts':
       return getAccounts(request);
     case '/prepare-swap':
