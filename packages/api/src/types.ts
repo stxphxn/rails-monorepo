@@ -1,9 +1,9 @@
-type Amount = {
+interface Amount {
   amount: number,
   currency: string,
 }
 
-type InternationalPayment = {
+interface InternationalPayment {
   chargeBearer?: string,
   currencyOfTransfer: string,
   exchangeRateInformation?: {
@@ -16,12 +16,17 @@ type InternationalPayment = {
   purpose?: string,
 }
 
-type AccountIdentifications = {
+interface AccountIdentification {
   identification: string,
   type: string,
 }
 
-type Address = {
+interface AccountInfo {
+  accountId: string,
+  accountIdentification: AccountIdentification,
+}
+
+interface Address {
   addressType? : string,
   buildingNumber? :string,
   country?: string,
@@ -33,7 +38,7 @@ type Address = {
   townName?: string,
 }
 
-type PeriodicPayment = {
+interface PeriodicPayment {
   finalPaymentAmount: {
     amount: number,
     currency: string,
@@ -53,6 +58,16 @@ type PeriodicPayment = {
   numberOfPayment?: string,
 }
 
+interface AccountRequest {
+  accountIdentifiers?: AccountInfo,
+  accountIdentifiersForBalance?: AccountInfo[],
+  accountIdentifiersForTransaction?: AccountInfo[],
+  expiresAt?: string,
+  featureScope?: string,
+  transactionFrom?: string,
+  transactionTo?: string,
+}
+
 
 
 export type PaymentRequest = {
@@ -60,14 +75,14 @@ export type PaymentRequest = {
   contextType?: string,
   internationalPayment?: InternationalPayment,
   payee: {
-    accountIdentifications:AccountIdentifications,
+    accountIdentifications:AccountIdentification,
     address?: Address,
     merchantCategoryCode?: string,
     merchantId?: string,
     name: string,
   },
   payer?: {
-    accountIdentifications: AccountIdentifications,
+    accountIdentifications: AccountIdentification,
     address?: Address,
     name: string,
   },
@@ -78,3 +93,12 @@ export type PaymentRequest = {
   reference?: string,
   type: string,
 };
+
+export type AccountAuthorisationRequest = {
+  accountRequest?: AccountRequest,
+  applicationUserId?: string,
+  callback?: string,
+  institutionId: string,
+  oneTimeToken?: boolean,
+  userUuid?: string,
+} 

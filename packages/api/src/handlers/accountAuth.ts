@@ -1,4 +1,5 @@
 import authCall from "../utils/authCall";
+import { AccountAuthorisationRequest } from "../types";
 
 const accountAuth = async (request: Request): Promise<Response> => {
   if (request.method !== "GET") {
@@ -9,7 +10,7 @@ const accountAuth = async (request: Request): Promise<Response> => {
 
   const body = await request.json();
 
-  const reqBody = {
+  const reqBody: AccountAuthorisationRequest = {
     applicationUserId: body.applicationUserId,
     institutionId: body.institutionId,
     callback: "https://display-parameters.com/"
