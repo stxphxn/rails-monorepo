@@ -8,6 +8,7 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
   }
   
   console.log('TODO: check signature against swap details');
+  console.log('TODO: ')
   const body = await request.json();
 
   return new Response('result',

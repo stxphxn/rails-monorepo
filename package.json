@@ -7,5 +7,8 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap"
+  },
+  "dependencies": {
+    "ethers": "^5.4.3"
   }
 }
