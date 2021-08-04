@@ -1,23 +1,30 @@
 const authToken = btoa(`${process.env.YAPILY_KEY}:${process.env.YAPILY_SECRET}`);
 
-const authCall = async (url: string, data = {}, method = 'GET'): Promise<any> => {
-  // Default options are marked with *
-  const response = await fetch(url, {
-    method: method, // *GET, POST, PUT, DELETE, etc.
-    // mode: 'cors', // no-cors, *cors, same-origin
-    // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    // credentials: 'same-origin', // include, *same-origin, omit
+type AuthRequest = {
+  method: string,
+  headers: {
+    'Authorization': string,
+    'Content-Type': string,
+    'consent'?: string,
+  },
+  body: string,
+}
+
+const authCall = async (url: string, data = {}, method = 'GET', consentToken?: string): Promise<any> => {
+  const request: AuthRequest = {
+    method: method,
     headers: {
       'Authorization': `Basic ${authToken}`,
       'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
     },
-    //redirect: 'follow', // manual, *follow, error
-    // referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    body: JSON.stringify(data),// body data type must match "Content-Type" header
-  });
+    body: JSON.stringify(data),
+  };
 
-  return response.json(); // parses JSON response into native JavaScript objects
+  if (consentToken) {
+    request.headers['consent'] = consentToken;
+  }
+
+  return (await fetch(url, request)).json();
 }
 
 export default authCall;

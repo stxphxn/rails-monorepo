@@ -1,3 +1,5 @@
+import {fetchConsentToken} from '../helpers/fetchConsentToken';
+
 type SwapDetails = {
   buyer: string,
   seller: string,
@@ -5,6 +7,7 @@ type SwapDetails = {
   token: string,
   exchangeRate: string,
   amount: number,
+  expiry: number,
 }
 
 
@@ -15,12 +18,12 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
     });
   }
   const body = await request.json();
-
   const swapDetails: SwapDetails = body.swapDetails;
-  console.log('TODO: check signature against swap details');
-  console.log('TODO: fetch seller account details');
-  console.log('TODO: create payment autorization');
-  console.log('TODO: create oracle signature ');
+  // TODO: check signature against swap details
+  // TODO: fetch seller account details
+    const consentToken = await fetchConsentToken(swapDetails.seller, '1');
+  // TODO: create payment autorization
+  // TODO: create oracle signature 
 
   return new Response('result',
     {
