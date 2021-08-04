@@ -16,7 +16,7 @@ interface InternationalPayment {
   purpose?: string,
 }
 
-interface AccountIdentification {
+export interface AccountIdentification {
   identification: string,
   type: string,
 }
@@ -75,7 +75,7 @@ export type PaymentRequest = {
   contextType?: string,
   internationalPayment?: InternationalPayment,
   payee: {
-    accountIdentifications:AccountIdentification,
+    accountIdentifications:AccountIdentification[],
     address?: Address,
     merchantCategoryCode?: string,
     merchantId?: string,
@@ -102,3 +102,14 @@ export type AccountAuthorisationRequest = {
   oneTimeToken?: boolean,
   userUuid?: string,
 } 
+
+export type PaymentDetails = {
+  amount: Amount,
+  applicationUserId: string,
+  institutionId: string,
+  payeeInfo: {
+    accountIdentifications: AccountIdentification[],
+    name: string,
+  }
+  swapHash: string,
+}
