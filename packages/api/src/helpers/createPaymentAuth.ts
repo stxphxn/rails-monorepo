@@ -1,5 +1,7 @@
 import authCall from "../utils/authCall";
-import { PaymentDetails, PaymentRequest } from "../types";
+import { PaymentDetails, PaymentRequest, PaymentAuthResponse } from "../types";
+
+
 
 const getReference = (hash: string): string => {
   return hash.substring(0, 10);
@@ -7,7 +9,7 @@ const getReference = (hash: string): string => {
 
 export const createPaymentAuth = async (
   paymentDetails: PaymentDetails,
-): Promise<string> => {
+): Promise<PaymentAuthResponse> => {
 
   const {
     amount,
@@ -38,5 +40,11 @@ export const createPaymentAuth = async (
     paymentRequest,
   };
   
-  return authCall('https://api.yapily.com/payment-auth-requests', reqBody, 'POST');
+  const paymentAuth =  await authCall('https://api.yapily.com/payment-auth-requests', reqBody, 'POST');
+  return {
+    paymentRequest,
+    authorisationUrl: paymentAuth.data.authorisationUrl,
+    id: paymentAuth.data.id,
+    userUuid: paymentAuth.data.userUuid,
+  };
 };

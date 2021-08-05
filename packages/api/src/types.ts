@@ -113,3 +113,10 @@ export type PaymentDetails = {
   }
   swapHash: string,
 }
+
+export type PaymentAuthResponse = {
+  paymentRequest: PaymentRequest,
+  authorisationUrl: string,
+  id: string,
+  userUuid: string,
+};
