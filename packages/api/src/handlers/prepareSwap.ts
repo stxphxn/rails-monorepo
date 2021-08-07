@@ -1,28 +1,10 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth } from '../helpers/createPaymentAuth';
-import { PaymentDetails, PaymentAuthResponse } from '../types';
-
-type SwapDetails = {
-  buyer: string,
-  seller: string,
-  currency: string,
-  token: string,
-  exchangeRate: number,
-  amount: number,
-  expiry: number,
-}
-
-type PrepareSwapRequestBody = {
-  swapDetails: SwapDetails,
-  sellerInstitution: string,
-  buyerInstititution: string,
-}
-
-type PrepareSwapResponse = {
-  signature: string,
-  paymentAuth: PaymentAuthResponse,
-}
-
+import { 
+  PaymentDetails,
+  PrepareSwapRequestBody,
+  PrepareSwapResponse,
+ } from '../types';
 
 export const prepareSwap = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -31,18 +13,19 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const swapDetails = body.swapDetails;
+  const swapInfo = body.swapInfo;
   // TODO: check signature against swap details
+
   // fetch seller account details
-  const accountDetails = await fetchAccountDetails(swapDetails.seller, body.sellerInstitution);
+  const accountDetails = await fetchAccountDetails(swapInfo.seller, body.sellerInstitution);
 
   // create payment autorisation
   const paymentDetails: PaymentDetails = {
     amount: {
-      amount: (swapDetails.amount * swapDetails.exchangeRate),
-      currency: swapDetails.currency,
+      amount: (swapInfo.amount * swapInfo.exchangeRate),
+      currency: swapInfo.currency,
     },
-    applicationUserId: swapDetails.buyer,
+    applicationUserId: swapInfo.buyer,
     institutionId: body.buyerInstititution,
     payeeInfo: {
       accountIdentifications: accountDetails.accountIdentifications,

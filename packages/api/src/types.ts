@@ -120,3 +120,28 @@ export type PaymentAuthResponse = {
   id: string,
   userUuid: string,
 };
+
+export type SwapInfo = {
+  buyer: string,
+  seller: string,
+  oracle: string,
+  currency: string,
+  token: string,
+  exchangeRate: number,
+  amount: number,
+  expiry: number,
+}
+
+export type PrepareSwapRequestBody = {
+  swapInfo: SwapInfo,
+  sellerInstitution: string,
+  buyerInstititution: string,
+  signatures: {
+
+  }
+}
+
+export type PrepareSwapResponse = {
+  signature: string,
+  paymentAuth: PaymentAuthResponse,
+}
