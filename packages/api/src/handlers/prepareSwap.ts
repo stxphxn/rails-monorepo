@@ -5,6 +5,7 @@ import {
   PrepareSwapRequestBody,
   PrepareSwapResponse,
  } from '../types';
+import { getSwapHash } from '../utils/getSwapHash';
 
 export const prepareSwap = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -13,17 +14,18 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const swapInfo = body.swapInfo;
+  const {swapInfo, currencyDetails} = body;
   // TODO: check signature against swap details
 
   // fetch seller account details
   const accountDetails = await fetchAccountDetails(swapInfo.seller, body.sellerInstitution);
 
   // create payment autorisation
+  const swapHash = getSwapHash(swapInfo, currencyDetails);
   const paymentDetails: PaymentDetails = {
     amount: {
-      amount: (swapInfo.amount * swapInfo.exchangeRate),
-      currency: swapInfo.currency,
+      amount: (swapInfo.amount * currencyDetails.exchangeRate),
+      currency: currencyDetails.currency,
     },
     applicationUserId: swapInfo.buyer,
     institutionId: body.buyerInstititution,
@@ -31,7 +33,7 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
       accountIdentifications: accountDetails.accountIdentifications,
       name: accountDetails.name,
     },
-    swapHash: '' //TODO: create swap hash
+    swapHash,
   }
   const paymentAuth = await createPaymentAuth(paymentDetails);
   // TODO: create oracle signature 

@@ -125,15 +125,19 @@ export type SwapInfo = {
   buyer: string,
   seller: string,
   oracle: string,
-  currency: string,
   token: string,
-  exchangeRate: number,
   amount: number,
   expiry: number,
 }
 
+export type CurrencyDetails = {
+  exchangeRate: number,
+  currency: string,
+}
+
 export type PrepareSwapRequestBody = {
   swapInfo: SwapInfo,
+  currencyDetails: CurrencyDetails,
   sellerInstitution: string,
   buyerInstititution: string,
   signatures: {
