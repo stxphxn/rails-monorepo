@@ -4,8 +4,10 @@ import {
   PaymentDetails,
   PrepareSwapRequestBody,
   PrepareSwapResponse,
+  Signature,
  } from '../types';
 import { getSwapHash } from '../utils/getSwapHash';
+import { verifySignature } from '../utils/verifySignature';
 
 export const prepareSwap = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -14,14 +16,17 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const {swapInfo, currencyDetails} = body;
-  // TODO: check signature against swap details
-
+  const {swapInfo, currencyDetails, signatures} = body;
+  
+  // check signature against swap details
+  const swapHash = getSwapHash(swapInfo, currencyDetails);
+  const verifySig = (signature: Signature) => verifySignature(signature.address, swapHash, signature.sig);
+  if (!signatures.every(verifySig)) throw Error('invalid signature/s');
+  
   // fetch seller account details
   const accountDetails = await fetchAccountDetails(swapInfo.seller, body.sellerInstitution);
 
   // create payment autorisation
-  const swapHash = getSwapHash(swapInfo, currencyDetails);
   const paymentDetails: PaymentDetails = {
     amount: {
       amount: (swapInfo.amount * currencyDetails.exchangeRate),
