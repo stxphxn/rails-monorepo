@@ -1,13 +1,16 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth } from '../helpers/createPaymentAuth';
+
+import { getSwapHash } from '../utils/getSwapHash';
+import { verifySignature } from '../utils/verifySignature';
+import { createSignature } from '../utils/createSignature';
+
 import { 
   PaymentDetails,
   PrepareSwapRequestBody,
   PrepareSwapResponse,
   Signature,
  } from '../types';
-import { getSwapHash } from '../utils/getSwapHash';
-import { verifySignature } from '../utils/verifySignature';
 
 export const prepareSwap = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -41,18 +44,20 @@ export const prepareSwap = async (request: Request): Promise<Response> => {
     swapHash,
   }
   const paymentAuth = await createPaymentAuth(paymentDetails);
-  // TODO: create oracle signature 
+  
+  // create oracle signature 
+  const signature = await createSignature(swapHash);
   
   // response
   const response: PrepareSwapResponse = {
-    signature: '', //TODO
+    signature,
     paymentAuth,
   }
   
   return new Response(JSON.stringify(response),
     {
       headers: {
-        "content-type": "application/json"
+        "content-type": 'application/json'
       }
     });
 };
