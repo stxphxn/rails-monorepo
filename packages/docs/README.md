@@ -13,4 +13,11 @@
 So, what really happens in this case? In short, the first party makes a bank transfer to the second party. Then, the cryptocurrency which had been held in escrow, is automatically released and transferred to the first party’s crypto account. Depending on the cryptocurrency transferred—and the banks used—the whole process should complete in just a few hours. It sounds too good to be true
 
 
+## Technologies Used
+- **Open Banking API** - Yapily
+- **App API** - Cloudflare Workers
+- **PWA** - Vue.js and Tailwind CSS
+- **Escrow Contract** - Solidity on Ethereum Testnet
+
+
 
