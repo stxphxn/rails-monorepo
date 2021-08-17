@@ -1,5 +1,5 @@
 {
-  "name": "worker-typescript-template",
+  "name": "api",
   "version": "1.0.0",
   "description": "Cloudflare worker TypeScript template",
   "main": "dist/worker.js",
