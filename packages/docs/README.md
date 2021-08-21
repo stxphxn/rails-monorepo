@@ -1,4 +1,4 @@
-# Rails Readme
+# Rails: P2P Crypto to Fiat Swaps
 
 ## What is Rails?
 The use of decentralised finance (DeFi) protocols has seen tremendous growth in recent times. The biggest blockchain platform Ethereum saw total value locked in DeFi protocols surpass $40 billion in 2021. DeFi uses cryptocurrencies and smart contracts to provide financial services without the use of an intermediary. However, one deterrent to the mass adoption of DeFi has been the difficulty involved in obtaining cryptocurrency from fiat money. A lack of fiat on/off ramps and high transaction costs present a barrier for new users who wish to make use of these new forms of finance.
@@ -24,5 +24,11 @@ So, what really happens in this case? In short, the first party makes a bank tra
 - **PWA** - Vue.js and Tailwind CSS
 - **Escrow Contract** - Solidity on Ethereum Testnet
 
+|  |  |
+|---|---|
+| **Open Banking API** | The Open Banking API is used |
+| **App API**| Yapily |
+| **PWA** | Yapily |
+| **Escrow Contract** | Yapily |
 
 
