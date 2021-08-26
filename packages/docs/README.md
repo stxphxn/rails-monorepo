@@ -1,10 +1,7 @@
 # Rails: P2P Crypto to Fiat Swaps
 
 ## What is Rails?
-The use of decentralised finance (DeFi) protocols has seen tremendous growth in recent times. The biggest blockchain platform Ethereum saw total value locked in DeFi protocols surpass $40 billion in 2021. DeFi uses cryptocurrencies and smart contracts to provide financial services without the use of an intermediary. However, one deterrent to the mass adoption of DeFi has been the difficulty involved in obtaining cryptocurrency from fiat money. A lack of fiat on/off ramps and high transaction costs present a barrier for new users who wish to make use of these new forms of finance.
-
-This project proposes a new type of peer-to-peer system that utilises open banking APIs and blockchain smart contracts to facilitate the exchange of FIAT currencies to cryptocurrency and vice versa. It will uses an Account Information Service Provider (AISP) as a smart contract oracle for verifying payments. 
-
+Rails is a peer-to-peer solution for swapping between fiat money and cryptocurrencies. By using an open banking API and an escrow smart contract, the buyer of a cryptocurrency in a trade no longer needs to trust that the funds will be released by the seller after a payment. It allows users to onboard directly in to decentralised finance (DeFi) protocols without the need of a centrailised exchange. 
 ## How does it work?
 1. Alice wants to sell 100 USDC for £70. a cryptocurrency pegged to the US Dollar.
 2. Bob wants to buy 100 USDC and is willing to pay £70 for it.
