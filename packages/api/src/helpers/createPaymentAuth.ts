@@ -3,7 +3,7 @@ import { PaymentDetails, PaymentRequest, PaymentAuthResponse } from "../types";
 
 
 
-const getReference = (hash: string): string => {
+export const getReference = (hash: string): string => {
   return hash.substring(0, 10);
 }
 
