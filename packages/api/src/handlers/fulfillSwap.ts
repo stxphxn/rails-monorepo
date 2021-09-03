@@ -1,11 +1,12 @@
 import { checkTransaction } from "../helpers/checkTransaction";
 import { fetchConsentToken } from "../helpers/fetchConsentToken";
-import { SwapInfo } from "../types";
+import { CurrencyDetails, SwapInfo } from "../types";
 import { getSwapHash } from "../utils/getSwapHash";
 
 export type FulfillSwapRequestBody = {
   swapInfo: SwapInfo,
   sellerInstitution: string,
+  currencyDetails: CurrencyDetails
 }
 
 export const fulfillSwap = async (request: Request): Promise<Response> => {
@@ -15,16 +16,21 @@ export const fulfillSwap = async (request: Request): Promise<Response> => {
     });
   }
   const body: FulfillSwapRequestBody = await request.json();
-  const { swapInfo } = body;
+  const { swapInfo, currencyDetails } = body;
 
   // TODO: check for valid swap hash 
-  const swapHash = getSwapHash(swapInfo, );
+  const swapHash = getSwapHash(swapInfo, currencyDetails);
   // TODO: fetch seller consent token
   const { consentToken, id } = await fetchConsentToken(swapInfo.seller, body.sellerInstitution);
   
   // TODO: check for payment transaction
   const received = await checkTransaction(consentToken, id,  swapHash, swapInfo.amount);
+  if (!received) {
+    throw new Error('Pyament not found');
+  }
+  
   // TODO: create release signature
+  
 
   return new Response('response',
   {
