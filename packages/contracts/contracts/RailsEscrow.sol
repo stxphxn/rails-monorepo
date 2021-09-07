@@ -64,9 +64,37 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit SellerRemoved(seller, msg.sender);
     }
 
-    function addAssetId(address assetId) external override onlyOwner {}
+    /**
+      * @notice Used to add assets that can
+      *         be swapped.
+      * @param assetId AssetId to add
+      */
+    function addAssetId(address assetId) external override onlyOwner {
+        // Sanity check: needs approval
+        require(approvedAssets[assetId] == false, "#AA:032");
 
-    function removeAssetId(address assetId) external override onlyOwner {}
+        // Update mapping
+        approvedAssets[assetId] = true;
+
+        // Emit event
+        emit AssetAdded(assetId, msg.sender);
+    }
+
+    /**
+      * @notice Used to remove assets that can
+      *         be swapped.
+      * @param assetId AssetId to remove
+      */
+    function removeAssetId(address assetId) external override onlyOwner {
+        // Sanity check: already approval
+        require(approvedAssets[assetId] == true, "#RA:033");
+
+        // Update mapping
+        approvedAssets[assetId] = false;
+
+        // Emit event
+        emit AssetRemoved(assetId, msg.sender);
+    }
 
     function addLiqudity() external override nonReentrant {}
 
