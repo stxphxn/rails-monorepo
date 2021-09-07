@@ -28,10 +28,41 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
      */
     mapping (bytes32 => uint32) internal swaps;
 
-    
-    function addSeller(address seller) external override onlyOwner {}
+    /**
+      * @notice Used to add sellers that can add liqudity
+      * @param seller Seller address to add
+      */
+    function addSeller(address seller) external override onlyOwner {
+        // Sanity check: not empty
+        require(seller != address(0), "#AS:001");
 
-    function removeSeller(address seller) external override onlyOwner {}
+        // Sanity check: needs approval
+        require(approvedSellers[seller] == false, "#AS:032");
+
+        // Update mapping
+        approvedSellers[seller] = true;
+
+        // Emit event
+        emit SellerAdded(seller, msg.sender);
+    }
+
+    /**
+      * @notice Used to remove sellers that can add liqudity
+      * @param seller Seller address to remove
+      */
+    function removeSeller(address seller) external override onlyOwner {
+        // Sanity check: not empty
+        require(seller != address(0), "#RS:001");
+
+        // Sanity check: needs approval
+        require(approvedSellers[seller] == true, "#RS:032");
+
+        // Update mapping
+        approvedSellers[seller] = false;
+
+        // Emit event
+        emit SellerRemoved(seller, msg.sender);
+    }
 
     function addAssetId(address assetId) external override onlyOwner {}
 
