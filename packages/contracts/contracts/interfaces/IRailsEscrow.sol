@@ -3,6 +3,35 @@ pragma solidity 0.8.0;
 
 interface IRailsEscrow {
 
+  struct SwapInfo {
+    address buyer;
+    address seller;
+    address assetId;
+    uint256 amount;
+  }
+  // Adding/removing seller events
+  event SellerAdded(address indexed addedSeller, address indexed caller);
+
+  event SellerRemoved(address indexed removedSeller, address indexed caller);
+
+  // Adding/removing asset events
+  event AssetAdded(address indexed addedAssetId, address indexed caller);
+
+  event AssetRemoved(address indexed removedAssetId, address indexed caller);
+
+  // Liquidity events
+  event LiquidityAdded(address indexed seller, address indexed assetId, uint256 amount, address caller);
+
+  event LiquidityRemoved(address indexed seller, address indexed assetId, uint256 amount, address recipient);
+
+  // Swap events
+  event SwapPrepared(bytes32 swapHash, address caller);
+
+  event SwapFulfilled(bytes32 swapHash, address caller);
+
+  event SwapCancelled(bytes32 swapHash, address caller);
+
+  
   function addSeller(address seller) external;
 
   function removeSeller(address seller) external;
@@ -15,13 +44,13 @@ interface IRailsEscrow {
 
   function removeLiqudity() external;
 
-  function prepare() external;
+  function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external;
 
-  function fulfill() external;
+  function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash) external;
 
-  function cancel() external;
+  function cancel(SwapInfo calldata swapInfo, string calldata currencyHash) external;
 
-  function getSwapStatus() external view;
+  function getSwapStatus() external view returns (uint32 status);
 
-  function getSwapHash() external view;
+  function getSwapHash() external view returns (bytes32);
 }
