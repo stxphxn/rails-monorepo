@@ -99,7 +99,13 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // Emit event
         emit AssetRemoved(assetId, msg.sender);
     }
-
+    /**
+      * @notice This is used by any seller to increase their available
+      *         liquidity for a given asset.
+      * @param amount The amount of liquidity to add for the seller
+      * @param assetId The address (or `address(0)` if native asset) of the
+      *                asset you're adding liquidity for
+      */
     function addLiqudity(uint256 amount, address assetId) external override nonReentrant {
         // Sanity check: nonzero amounts
         require(amount > 0, "#AL:002");
@@ -117,7 +123,32 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit LiquidityAdded(msg.sender, assetId, amount, msg.sender);
     }
 
-    function removeLiqudity(uint256 amount, address assetId) external override nonReentrant {}
+    /**
+      * @notice This is used by any seller to decrease their available
+      *         liquidity for a given asset.
+      * @param amount The amount of liquidity to remove for the seller
+      * @param assetId The address (or `address(0)` if native asset) of the
+      *                asset you're removing liquidity for
+      */
+    function removeLiqudity(uint256 amount, address assetId) external override nonReentrant {
+        // Sanity check: nonzero amounts
+        require(amount > 0, "#RL:002");
+
+        uint256 sellerBalance = sellerBalances[msg.sender][assetId];
+        // Sanity check: amount can be deducted for the router
+        require(sellerBalance >= amount, "#RL:008");
+
+        // Update router balances
+        unchecked {
+          sellerBalances[msg.sender][assetId] = sellerBalance - amount;
+        }
+
+        // Transfer from contract to specified recipient
+        LibAsset.transferAsset(assetId, payable(msg.sender), amount);
+
+        // Emit event
+        emit LiquidityRemoved(msg.sender, assetId, amount, msg.sender);
+    }
 
     function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
 
