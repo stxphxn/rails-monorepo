@@ -2,6 +2,7 @@
 pragma solidity 0.8.0;
 
 import "./interfaces/IRailsEscrow.sol";
+import "./lib/LibAsset.sol";
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -106,8 +107,12 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         require(approvedSellers[msg.sender], "#AL:003");
 
         require(approvedAssets[assetId] == true, "#AL:004");
+        
+        // Transfer funds to contract
+        amount = _transferAssetToContract(assetId, amount);
 
-        SafeERC20.safeTransferFrom(IERC20(assetId), msg.sender, address(this), amount);
+        // Update the seller balances.
+        sellerBalances[msg.sender][assetId] += amount;
 
         emit LiquidityAdded(msg.sender, assetId, amount, msg.sender);
     }
@@ -123,4 +128,29 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
     function getSwapStatus() external view override returns (uint32 status) {}
 
     function getSwapHash() external view override returns (bytes32) {}
+
+  /**
+    * @notice Handles transferring funds from msg.sender to the
+    *          transaction manager contract. Used in prepare, addLiquidity
+    * @param assetId The address to transfer
+    * @param specifiedAmount The specified amount to transfer. May not be the 
+    *                        actual amount transferred (i.e. fee on transfer 
+    *                        tokens)
+    */
+  function _transferAssetToContract(address assetId, uint256 specifiedAmount) internal returns (uint256) {
+    uint256 trueAmount = specifiedAmount;
+
+    // Validate correct amounts are transferred
+    if (LibAsset.isNativeAsset(assetId)) {
+      require(msg.value == specifiedAmount, "#TA:005");
+    } else {
+      uint256 starting = LibAsset.getOwnBalance(assetId);
+      require(msg.value == 0, "#TA:006");
+      LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
+      // Calculate the *actual* amount that was sent here
+      trueAmount = LibAsset.getOwnBalance(assetId) - starting;
+    }
+
+    return trueAmount;
+  }
 }
