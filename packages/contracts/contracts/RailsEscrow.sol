@@ -6,6 +6,9 @@ import "./interfaces/IRailsEscrow.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+import "../node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
     /**
       * @dev Mapping of seller to balance specific to asset
@@ -96,9 +99,20 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit AssetRemoved(assetId, msg.sender);
     }
 
-    function addLiqudity() external override nonReentrant {}
+    function addLiqudity(uint256 amount, address assetId) external override nonReentrant {
+        // Sanity check: nonzero amounts
+        require(amount > 0, "#AL:002");
 
-    function removeLiqudity() external override nonReentrant {}
+        require(approvedSellers[msg.sender], "#AL:003");
+
+        require(approvedAssets[assetId] == true, "#AL:004");
+
+        SafeERC20.safeTransferFrom(IERC20(assetId), msg.sender, address(this), amount);
+
+        emit LiquidityAdded(msg.sender, assetId, amount, msg.sender);
+    }
+
+    function removeLiqudity(uint256 amount, address assetId) external override nonReentrant {}
 
     function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
 
