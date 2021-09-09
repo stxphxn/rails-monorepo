@@ -50,7 +50,7 @@ interface IRailsEscrow {
 
   function cancel(SwapInfo calldata swapInfo, string calldata currencyHash) external;
 
-  function getSwapStatus() external view returns (uint32 status);
+  function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view returns (uint32 status);
 
-  function getSwapHash() external view returns (bytes32);
+  function getSwapHash(SwapInfo calldata swapInfo, string calldata currencyHash) external pure returns (bytes32);
 }

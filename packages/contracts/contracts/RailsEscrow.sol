@@ -11,6 +11,8 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
+
+    uint32 internal constant SWAP_LOCK_TIME = 24 hours;
     /**
       * @dev Mapping of seller to balance specific to asset
       */
@@ -150,15 +152,53 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit LiquidityRemoved(msg.sender, assetId, amount, msg.sender);
     }
 
-    function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
+    function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {
+        // Sanity check: buyer is sensible
+        require(swapInfo.buyer != address(0), "#P:009");
+
+        // Sanity check: seller is sensible
+        require(swapInfo.seller != address(0), "#P:001");
+
+        // Check seller is approved
+        require(approvedSellers[swapInfo.seller], "#P:003");
+
+        // check asset is approved
+        require(approvedAssets[swapInfo.assetId], "#P:004");
+
+        // check seller has enough liquidity
+        uint256 balance = sellerBalances[swapInfo.seller][swapInfo.assetId];
+        require(balance >= swapInfo.amount, "#P:018");
+
+        // check swap doesn't already exist
+        bytes32 digest = getSwapHash(swapInfo, currencyHash);
+        require(swaps[digest] == 0, "#P:015");
+
+        // store swap expiry
+        swaps[digest] = uint32(block.timestamp) + SWAP_LOCK_TIME;
+
+      // Decrement the seller's liquidity
+      // using unchecked because underflow protected against with require
+        unchecked {
+          sellerBalances[swapInfo.seller][swapInfo.assetId] = balance - swapInfo.amount;
+        }
+
+        emit SwapPrepared(digest, msg.sender);
+    }
 
     function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
 
     function cancel(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
 
-    function getSwapStatus() external view override returns (uint32 status) {}
+    function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view override returns (uint32 status) {
+        bytes32 digest = getSwapHash(swapInfo, currencyHash);
+        return swaps[digest];
+    }
 
-    function getSwapHash() external view override returns (bytes32) {}
+    function getSwapHash(SwapInfo calldata swapInfo, string calldata currencyHash) public pure override returns (bytes32) {
+        return keccak256(
+            abi.encode(swapInfo, currencyHash)
+        );
+    }
 
   /**
     * @notice Handles transferring funds from msg.sender to the
