@@ -6,6 +6,7 @@ import "./lib/LibAsset.sol";
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "../node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "../node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -176,8 +177,8 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // store swap expiry
         swaps[digest] = uint32(block.timestamp) + SWAP_LOCK_TIME;
 
-      // Decrement the seller's liquidity
-      // using unchecked because underflow protected against with require
+        // Decrement the seller's liquidity
+        // using unchecked because underflow protected against with require
         unchecked {
           sellerBalances[swapInfo.seller][swapInfo.assetId] = balance - swapInfo.amount;
         }
@@ -185,9 +186,21 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit SwapPrepared(digest, msg.sender);
     }
 
-    function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
+    function fulfill(
+        SwapInfo calldata swapInfo, 
+        string calldata currencyHash, 
+        bytes calldata fulfillSignature
+      ) external override nonReentrant {
+        // check swap exists
+        bytes32 digest = getSwapHash(swapInfo, currencyHash);
+        require(swaps[digest] != 0, "#F:01");
 
-    function cancel(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {}
+        // Make sure the expiry has not elapsed
+        require(swaps[digest] >= block.timestamp, "#F:02");
+
+    }
+
+    function cancel(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata cancelSignature) external override nonReentrant {}
 
     function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view override returns (uint32 status) {
         bytes32 digest = getSwapHash(swapInfo, currencyHash);
@@ -209,19 +222,34 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
     *                        tokens)
     */
   function _transferAssetToContract(address assetId, uint256 specifiedAmount) internal returns (uint256) {
-    uint256 trueAmount = specifiedAmount;
+      uint256 trueAmount = specifiedAmount;
 
-    // Validate correct amounts are transferred
-    if (LibAsset.isNativeAsset(assetId)) {
-      require(msg.value == specifiedAmount, "#TA:005");
-    } else {
-      uint256 starting = LibAsset.getOwnBalance(assetId);
-      require(msg.value == 0, "#TA:006");
-      LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
-      // Calculate the *actual* amount that was sent here
-      trueAmount = LibAsset.getOwnBalance(assetId) - starting;
-    }
+      // Validate correct amounts are transferred
+      if (LibAsset.isNativeAsset(assetId)) {
+        require(msg.value == specifiedAmount, "#TA:005");
+      } else {
+        uint256 starting = LibAsset.getOwnBalance(assetId);
+        require(msg.value == 0, "#TA:006");
+        LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
+        // Calculate the *actual* amount that was sent here
+        trueAmount = LibAsset.getOwnBalance(assetId) - starting;
+      }
 
-    return trueAmount;
+      return trueAmount;
   }
+
+    /**
+    * @notice Holds the logic to recover the signer from an encoded payload.
+    *         Will hash and convert to an eth signed message.
+    * @param encodedPayload The payload that was signed
+    * @param signature The signature you are recovering the signer from
+    */
+  function _recoverSignature(bytes memory encodedPayload, bytes calldata  signature) internal pure returns (address) {
+      // Recover
+      return ECDSA.recover(
+        ECDSA.toEthSignedMessageHash(keccak256(encodedPayload)),
+        signature
+      );
+  }
+
 }

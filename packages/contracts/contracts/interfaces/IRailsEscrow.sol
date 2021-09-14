@@ -46,9 +46,9 @@ interface IRailsEscrow {
 
   function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external;
 
-  function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash) external;
+  function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata fulfillSignatureh) external;
 
-  function cancel(SwapInfo calldata swapInfo, string calldata currencyHash) external;
+  function cancel(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata cancelSignature) external;
 
   function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view returns (uint32 status);
 
