@@ -6,8 +6,14 @@ interface IRailsEscrow {
   struct SwapInfo {
     address buyer;
     address seller;
+    address oracle;
     address assetId;
     uint256 amount;
+  }
+
+  struct SignedFulfillData {
+    string functionIdentifier;
+    bytes32 swapHash;
   }
   // Adding/removing seller events
   event SellerAdded(address indexed addedSeller, address indexed caller);

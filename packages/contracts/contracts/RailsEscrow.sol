@@ -190,7 +190,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         SwapInfo calldata swapInfo, 
         string calldata currencyHash, 
         bytes calldata fulfillSignature
-      ) external override nonReentrant {
+    ) external override nonReentrant {
         // check swap exists
         bytes32 digest = getSwapHash(swapInfo, currencyHash);
         require(swaps[digest] != 0, "#F:01");
@@ -198,9 +198,37 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // Make sure the expiry has not elapsed
         require(swaps[digest] >= block.timestamp, "#F:02");
 
+        // Validate signature
+        require(msg.sender == swapInfo.seller || _recoverFulfillSignature(digest, fulfillSignature) == swapInfo.oracle, "#F:03");
+
+        // transfer assets to buyer
+        LibAsset.transferAsset(swapInfo.assetId, payable(swapInfo.buyer), swapInfo.amount);
+
+        emit SwapPrepared(digest, msg.sender);
     }
 
-    function cancel(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata cancelSignature) external override nonReentrant {}
+    function cancel(
+        SwapInfo calldata swapInfo,
+        string calldata currencyHash,
+        bytes calldata cancelSignature
+    ) external override nonReentrant {
+        // check swap exists
+        bytes32 digest = getSwapHash(swapInfo, currencyHash);
+        require(swaps[digest] != 0, "#F:01");
+        
+        if (swaps[digest] >= block.timestamp) {
+          // Timeout has not expired and tx may only be cancelled by buyer
+          // NOTE: no need to validate the signature here, since you are requiring
+          // the buyer must be the sender when the cancellation is during the
+          // fulfill-able window
+          require(msg.sender == swapInfo.buyer || _recoverCancelSignature(digest, cancelSignature) == swapInfo.buyer, "#C:025");
+        }
+        
+        // Return liquidity to seller
+        sellerBalances[swapInfo.seller][swapInfo.assetId] += swapInfo.amount;
+
+        emit SwapCancelled(digest, msg.sender);
+    }
 
     function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view override returns (uint32 status) {
         bytes32 digest = getSwapHash(swapInfo, currencyHash);
@@ -213,30 +241,68 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         );
     }
 
-  /**
-    * @notice Handles transferring funds from msg.sender to the
-    *          transaction manager contract. Used in prepare, addLiquidity
-    * @param assetId The address to transfer
-    * @param specifiedAmount The specified amount to transfer. May not be the 
-    *                        actual amount transferred (i.e. fee on transfer 
-    *                        tokens)
-    */
-  function _transferAssetToContract(address assetId, uint256 specifiedAmount) internal returns (uint256) {
-      uint256 trueAmount = specifiedAmount;
+    /**
+      * @notice Handles transferring funds from msg.sender to the
+      *          transaction manager contract. Used in prepare, addLiquidity
+      * @param assetId The address to transfer
+      * @param specifiedAmount The specified amount to transfer. May not be the 
+      *                        actual amount transferred (i.e. fee on transfer 
+      *                        tokens)
+      */
+    function _transferAssetToContract(address assetId, uint256 specifiedAmount) internal returns (uint256) {
+        uint256 trueAmount = specifiedAmount;
 
-      // Validate correct amounts are transferred
-      if (LibAsset.isNativeAsset(assetId)) {
-        require(msg.value == specifiedAmount, "#TA:005");
-      } else {
-        uint256 starting = LibAsset.getOwnBalance(assetId);
-        require(msg.value == 0, "#TA:006");
-        LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
-        // Calculate the *actual* amount that was sent here
-        trueAmount = LibAsset.getOwnBalance(assetId) - starting;
-      }
+        // Validate correct amounts are transferred
+        if (LibAsset.isNativeAsset(assetId)) {
+          require(msg.value == specifiedAmount, "#TA:005");
+        } else {
+          uint256 starting = LibAsset.getOwnBalance(assetId);
+          require(msg.value == 0, "#TA:006");
+          LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
+          // Calculate the *actual* amount that was sent here
+          trueAmount = LibAsset.getOwnBalance(assetId) - starting;
+        }
 
-      return trueAmount;
-  }
+        return trueAmount;
+    }
+
+      /**
+      * @notice Recovers the signer from the signature provided by the oracle
+      * @param swapHash The swap hash
+      * @param signature The signature you are recovering the signer from
+      */
+    function _recoverFulfillSignature(
+      bytes32 swapHash,
+      bytes calldata signature
+    ) internal pure returns (address) {
+        // Create the signed payload
+        SignedFulfillData memory payload = SignedFulfillData({
+          functionIdentifier: "fulfill",
+          swapHash: swapHash
+        });
+
+        // Recover
+        return _recoverSignature(abi.encode(payload), signature);
+    }
+
+          /**
+      * @notice Recovers the signer from the signature provided by the buyer
+      * @param swapHash The swap hash
+      * @param signature The signature you are recovering the signer from
+      */
+    function _recoverCancelSignature(
+      bytes32 swapHash,
+      bytes calldata signature
+    ) internal pure returns (address) {
+        // Create the signed payload
+        SignedFulfillData memory payload = SignedFulfillData({
+          functionIdentifier: "cancel",
+          swapHash: swapHash
+        });
+
+        // Recover
+        return _recoverSignature(abi.encode(payload), signature);
+    }
 
     /**
     * @notice Holds the logic to recover the signer from an encoded payload.
@@ -244,12 +310,12 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
     * @param encodedPayload The payload that was signed
     * @param signature The signature you are recovering the signer from
     */
-  function _recoverSignature(bytes memory encodedPayload, bytes calldata  signature) internal pure returns (address) {
-      // Recover
-      return ECDSA.recover(
-        ECDSA.toEthSignedMessageHash(keccak256(encodedPayload)),
-        signature
-      );
-  }
+    function _recoverSignature(bytes memory encodedPayload, bytes calldata  signature) internal pure returns (address) {
+        // Recover
+        return ECDSA.recover(
+          ECDSA.toEthSignedMessageHash(keccak256(encodedPayload)),
+          signature
+        );
+    }
 
 }
