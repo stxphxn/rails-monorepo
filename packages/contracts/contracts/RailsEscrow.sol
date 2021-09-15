@@ -200,11 +200,14 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
 
         // Validate signature
         require(msg.sender == swapInfo.seller || _recoverFulfillSignature(digest, fulfillSignature) == swapInfo.oracle, "#F:03");
-
+        
+        // delete the swap
+        swaps[digest] = 0;
+        
         // transfer assets to buyer
         LibAsset.transferAsset(swapInfo.assetId, payable(swapInfo.buyer), swapInfo.amount);
 
-        emit SwapPrepared(digest, msg.sender);
+        emit SwapFulfilled(digest, msg.sender);
     }
 
     function cancel(
@@ -217,13 +220,13 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         require(swaps[digest] != 0, "#F:01");
         
         if (swaps[digest] >= block.timestamp) {
-          // Timeout has not expired and tx may only be cancelled by buyer
-          // NOTE: no need to validate the signature here, since you are requiring
-          // the buyer must be the sender when the cancellation is during the
-          // fulfill-able window
+          // Timeout has not expired and tx may only be cancelled by the buyer
+          // Validate signature
           require(msg.sender == swapInfo.buyer || _recoverCancelSignature(digest, cancelSignature) == swapInfo.buyer, "#C:025");
         }
-        
+        // delete the swap
+        swaps[digest] = 0;
+
         // Return liquidity to seller
         sellerBalances[swapInfo.seller][swapInfo.assetId] += swapInfo.amount;
 
