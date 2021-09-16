@@ -9,6 +9,18 @@ interface IRailsEscrow {
     address oracle;
     address assetId;
     uint256 amount;
+    uint256 swapId;
+  }
+
+  struct SwapData {
+    address buyer;
+    address seller;
+    address oracle;
+    address assetId;
+    uint256 amount;
+    uint256 swapId;
+    uint256 prepareBlockNumber;
+    uint256 expiry;
   }
 
   struct SignedFulfillData {
