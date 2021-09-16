@@ -153,7 +153,10 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         emit LiquidityRemoved(msg.sender, assetId, amount, msg.sender);
     }
 
-    function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external override nonReentrant {
+    function prepare(
+        SwapInfo calldata swapInfo,
+        string calldata currencyHash
+    ) external override nonReentrant returns(SwapData memory) {
         // Sanity check: buyer is sensible
         require(swapInfo.buyer != address(0), "#P:009");
 
@@ -174,6 +177,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         bytes32 digest = getSwapHash(swapInfo, currencyHash);
         require(swaps[digest] == 0, "#P:015");
 
+        uint32 expiry = uint32(block.timestamp) + SWAP_LOCK_TIME;
         // store swap expiry
         swaps[digest] = uint32(block.timestamp) + SWAP_LOCK_TIME;
 
@@ -183,7 +187,19 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
           sellerBalances[swapInfo.seller][swapInfo.assetId] = balance - swapInfo.amount;
         }
 
+        SwapData memory swapData = SwapData({
+            buyer: swapInfo.buyer,
+            seller: swapInfo.seller,
+            oracle: swapInfo.oracle,
+            assetId: swapInfo.assetId,
+            amount: swapInfo.amount,
+            swapId: swapInfo.swapId,
+            prepareBlockNumber: block.number,
+            expiry: expiry
+        });
+
         emit SwapPrepared(digest, msg.sender);
+        return swapData;
     }
 
     function fulfill(
@@ -203,7 +219,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         
         // delete the swap
         swaps[digest] = 0;
-        
+
         // transfer assets to buyer
         LibAsset.transferAsset(swapInfo.assetId, payable(swapInfo.buyer), swapInfo.amount);
 

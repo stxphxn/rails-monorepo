@@ -62,7 +62,7 @@ interface IRailsEscrow {
 
   function removeLiqudity(uint256 amount, address assetId) external;
 
-  function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external;
+  function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external returns(SwapData memory);
 
   function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata fulfillSignatureh) external;
 
