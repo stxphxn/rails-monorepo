@@ -10,6 +10,7 @@ interface IRailsEscrow {
     address assetId;
     uint256 amount;
     uint256 swapId;
+    string currencyHash;
   }
 
   struct SwapData {
@@ -19,6 +20,7 @@ interface IRailsEscrow {
     address assetId;
     uint256 amount;
     uint256 swapId;
+    string currencyHash;
     uint256 prepareBlockNumber;
     uint256 expiry;
   }
@@ -27,6 +29,13 @@ interface IRailsEscrow {
     string functionIdentifier;
     bytes32 swapHash;
   }
+
+  struct SwapTransactionData {
+    uint256 amount;
+    uint256 expiry;
+    uint256 prepareBlockNumber;
+  }
+
   // Adding/removing seller events
   event SellerAdded(address indexed addedSeller, address indexed caller);
 
@@ -62,13 +71,13 @@ interface IRailsEscrow {
 
   function removeLiqudity(uint256 amount, address assetId) external;
 
-  function prepare(SwapInfo calldata swapInfo, string calldata currencyHash) external returns(SwapData memory);
+  function prepare(SwapInfo calldata swapInfo) external returns(SwapData memory);
 
-  function fulfill(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata fulfillSignatureh) external;
+  function fulfill(SwapData calldata swapData, bytes calldata fulfillSignatureh) external;
 
-  function cancel(SwapInfo calldata swapInfo, string calldata currencyHash, bytes calldata cancelSignature) external;
+  function cancel(SwapData calldata swapData, bytes calldata cancelSignature) external;
 
-  function getSwapStatus(SwapInfo calldata swapInfo, string calldata currencyHash) external view returns (uint32 status);
+  function getSwapStatus(SwapInfo calldata swapInfo) external view returns (bytes32 status);
 
-  function getSwapHash(SwapInfo calldata swapInfo, string calldata currencyHash) external pure returns (bytes32);
+  function getSwapHash(SwapData calldata swapData) external pure returns (bytes32);
 }
