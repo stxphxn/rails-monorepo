@@ -1,6 +1,6 @@
 import institutionsHandler from "./handlers/getInstitutions";
 import getAccounts from "./handlers/getAccounts";
-import { prepareSwap } from "./handlers/prepareSwap";
+import { prepare } from "./handlers/prepare";
 
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
@@ -10,10 +10,13 @@ export async function handleRequest(request: Request): Promise<Response> {
       return institutionsHandler(request);
     case '/accounts':
       return getAccounts(request);
-    case '/prepare-swap':
-      return prepareSwap(request);
-    case '/fulfill-swap':
+    case '/prepare':
+      return prepare(request);
+    case '/fulfill':
       console.log('release funds if payment has been made');
+      break;
+    case '/cancel':
+      console.log('cancel swap');
       break;
     default:
       break;

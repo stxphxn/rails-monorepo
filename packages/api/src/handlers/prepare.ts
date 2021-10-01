@@ -12,7 +12,7 @@ import {
   Signature,
  } from '../types';
 
-export const prepareSwap = async (request: Request): Promise<Response> => {
+export const prepare = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", {
       status: 405

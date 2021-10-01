@@ -9,7 +9,7 @@ export type FulfillSwapRequestBody = {
   currencyDetails: CurrencyDetails
 }
 
-export const fulfillSwap = async (request: Request): Promise<Response> => {
+export const fulfil = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", {
       status: 405
