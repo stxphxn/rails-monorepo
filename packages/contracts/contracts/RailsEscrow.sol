@@ -202,9 +202,9 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         return swapData;
     }
 
-    function fulfill(
+    function fulfil(
         SwapData calldata swapData, 
-        bytes calldata fulfillSignature
+        bytes calldata fulfilSignature
     ) external override nonReentrant {
         // Check if the swap exists
         bytes32 digest = getSwapHash(swapData);
@@ -219,7 +219,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         require(swapData.prepareBlockNumber > 0, "#F:021");
 
         // Validate signature
-        require(msg.sender == swapData.seller || _recoverFulfillSignature(digest, fulfillSignature) == swapData.oracle, "#F:03");
+        require(msg.sender == swapData.seller || _recoverFulfilSignature(digest, fulfilSignature) == swapData.oracle, "#F:03");
         
         // To prevent a swap from being repeated the prepareBlockNumber is set to 0 before being hashed
         swaps[digest] = _hashSwapTransactionData(swapData.amount, swapData.expiry, 0);
@@ -227,7 +227,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // transfer assets to buyer
         LibAsset.transferAsset(swapData.assetId, payable(swapData.buyer), swapData.amount);
 
-        emit SwapFulfilled(digest, msg.sender);
+        emit SwapFulfiled(digest, msg.sender);
     }
 
     function cancel(
@@ -317,13 +317,13 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @param swapHash The swap hash
       * @param signature The signature you are recovering the signer from
       */
-    function _recoverFulfillSignature(
+    function _recoverFulfilSignature(
       bytes32 swapHash,
       bytes calldata signature
     ) internal pure returns (address) {
         // Create the signed payload
-        SignedFulfillData memory payload = SignedFulfillData({
-          functionIdentifier: "fulfill",
+        SignedFulfilData memory payload = SignedFulfilData({
+          functionIdentifier: "fulfil",
           swapHash: swapHash
         });
 
@@ -341,7 +341,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       bytes calldata signature
     ) internal pure returns (address) {
         // Create the signed payload
-        SignedFulfillData memory payload = SignedFulfillData({
+        SignedFulfilData memory payload = SignedFulfilData({
           functionIdentifier: "cancel",
           swapHash: swapHash
         });

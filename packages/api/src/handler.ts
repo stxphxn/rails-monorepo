@@ -12,7 +12,7 @@ export async function handleRequest(request: Request): Promise<Response> {
       return getAccounts(request);
     case '/prepare':
       return prepare(request);
-    case '/fulfill':
+    case '/fulfil':
       console.log('release funds if payment has been made');
       break;
     case '/cancel':

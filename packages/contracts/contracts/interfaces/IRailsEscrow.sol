@@ -25,7 +25,7 @@ interface IRailsEscrow {
     uint256 expiry;
   }
 
-  struct SignedFulfillData {
+  struct SignedFulfilData {
     string functionIdentifier;
     bytes32 swapHash;
   }
@@ -54,7 +54,7 @@ interface IRailsEscrow {
   // Swap events
   event SwapPrepared(bytes32 swapHash, address caller);
 
-  event SwapFulfilled(bytes32 swapHash, address caller);
+  event SwapFulfiled(bytes32 swapHash, address caller);
 
   event SwapCancelled(bytes32 swapHash, address caller);
 
@@ -73,7 +73,7 @@ interface IRailsEscrow {
 
   function prepare(SwapInfo calldata swapInfo) external returns(SwapData memory);
 
-  function fulfill(SwapData calldata swapData, bytes calldata fulfillSignatureh) external;
+  function fulfil(SwapData calldata swapData, bytes calldata fulfilSignatureh) external;
 
   function cancel(SwapData calldata swapData, bytes calldata cancelSignature) external;
 

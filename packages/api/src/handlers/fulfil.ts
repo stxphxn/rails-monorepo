@@ -3,7 +3,7 @@ import { fetchConsentToken } from "../helpers/fetchConsentToken";
 import { CurrencyDetails, SwapInfo } from "../types";
 import { getSwapHash } from "../utils/getSwapHash";
 
-export type FulfillSwapRequestBody = {
+export type FulfilSwapRequestBody = {
   swapInfo: SwapInfo,
   sellerInstitution: string,
   currencyDetails: CurrencyDetails
@@ -15,7 +15,7 @@ export const fulfil = async (request: Request): Promise<Response> => {
       status: 405
     });
   }
-  const body: FulfillSwapRequestBody = await request.json();
+  const body: FulfilSwapRequestBody = await request.json();
   const { swapInfo, currencyDetails } = body;
 
   // TODO: check for valid swap hash 
