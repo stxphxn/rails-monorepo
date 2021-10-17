@@ -2,14 +2,14 @@
 pragma solidity 0.8.0;
 
 import "./interfaces/IRailsEscrow.sol";
-import "./lib/LibAsset.sol";
+import "./libraries/LibAsset.sol";
 
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "../node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "../node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
 
@@ -157,10 +157,10 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         SwapInfo calldata swapInfo
     ) external override nonReentrant returns(SwapData memory) {
         // Sanity check: buyer is sensible
-        require(swapInfo.buyer != address(0), "#P:009");
+        require(swapInfo.buyer != address(0), "#P:001");
 
         // Sanity check: seller is sensible
-        require(swapInfo.seller != address(0), "#P:001");
+        require(swapInfo.seller != address(0), "#P:002");
 
         // Check seller is approved
         require(approvedSellers[swapInfo.seller], "#P:003");
@@ -170,11 +170,11 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
 
         // check seller has enough liquidity
         uint256 balance = sellerBalances[swapInfo.seller][swapInfo.assetId];
-        require(balance >= swapInfo.amount, "#P:018");
+        require(balance >= swapInfo.amount, "#P:005");
 
         // check swap doesn't already exist
         bytes32 digest = keccak256(abi.encode(swapInfo));
-        require(swaps[digest] == 0, "#P:015");
+        require(swaps[digest] == 0, "#P:006");
 
         uint32 expiry = uint32(block.timestamp) + SWAP_LOCK_TIME;
         // store swap expiry
@@ -210,7 +210,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         bytes32 digest = getSwapHash(swapData);
 
         // Make sure that the swap transaction data matches what was stored
-        require(swaps[digest] == _hashSwapTransactionData(swapData.amount, swapData.expiry, swapData.prepareBlockNumber), "#F:019");
+        require(swaps[digest] == _hashSwapTransactionData(swapData.amount, swapData.expiry, swapData.prepareBlockNumber), "#F:01");
 
         // Make sure the expiry has not elapsed
         require(swapData.expiry >= block.timestamp, "#F:020");
@@ -219,7 +219,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         require(swapData.prepareBlockNumber > 0, "#F:021");
 
         // Validate signature
-        require(msg.sender == swapData.seller || _recoverFulfilSignature(digest, fulfilSignature) == swapData.oracle, "#F:03");
+        require(msg.sender == swapData.seller || _recoverFulfilSignature(digest, fulfilSignature) == swapData.oracle, "#F:02");
         
         // To prevent a swap from being repeated the prepareBlockNumber is set to 0 before being hashed
         swaps[digest] = _hashSwapTransactionData(swapData.amount, swapData.expiry, 0);

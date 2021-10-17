@@ -73,7 +73,7 @@ interface IRailsEscrow {
 
   function prepare(SwapInfo calldata swapInfo) external returns(SwapData memory);
 
-  function fulfil(SwapData calldata swapData, bytes calldata fulfilSignatureh) external;
+  function fulfil(SwapData calldata swapData, bytes calldata fulfilSignature) external;
 
   function cancel(SwapData calldata swapData, bytes calldata cancelSignature) external;
 
