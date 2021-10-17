@@ -78,7 +78,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       */
     function addAssetId(address assetId) external override onlyOwner {
         // Sanity check: needs approval
-        require(approvedAssets[assetId] == false, "#AA:032");
+        require(approvedAssets[assetId] == false, "#AA:001");
 
         // Update mapping
         approvedAssets[assetId] = true;
