@@ -67,9 +67,9 @@ interface IRailsEscrow {
 
   function removeAssetId(address assetId) external;
 
-  function addLiqudity(uint256 amount, address assetId) external;
+  function addLiquidity(uint256 amount, address assetId) external;
 
-  function removeLiqudity(uint256 amount, address assetId) external;
+  function removeLiquidity(uint256 amount, address assetId) external;
 
   function prepare(SwapInfo calldata swapInfo) external returns(SwapData memory);
 

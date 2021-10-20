@@ -109,7 +109,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @param assetId The address (or `address(0)` if native asset) of the
       *                asset you're adding liquidity for
       */
-    function addLiqudity(uint256 amount, address assetId) external override nonReentrant {
+    function addLiquidity(uint256 amount, address assetId) external override nonReentrant {
         // Sanity check: nonzero amounts
         require(amount > 0, "#AL:002");
 
@@ -133,7 +133,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @param assetId The address (or `address(0)` if native asset) of the
       *                asset you're removing liquidity for
       */
-    function removeLiqudity(uint256 amount, address assetId) external override nonReentrant {
+    function removeLiquidity(uint256 amount, address assetId) external override nonReentrant {
         // Sanity check: nonzero amounts
         require(amount > 0, "#RL:002");
 
