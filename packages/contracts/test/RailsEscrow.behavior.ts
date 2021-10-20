@@ -55,3 +55,10 @@ export function shouldAddAndRemoveSellers(): void {
 }
 
 
+export function shouldAddAndRemoveLiqudity(): void {
+  it('should add liquidity', async function () {
+    this.escrow.addSeller(this.signers.seller.address)
+    const seller = await this.escrow.connect(this.signers.seller);
+  });
+}
+

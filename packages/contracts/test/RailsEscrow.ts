@@ -20,7 +20,7 @@ describe("Unit tests", function () {
     this.signers.oracle = signers[3];
   });
 
-  describe("RailsEscrow", function () {
+  describe('RailsEscrow', function () {
     beforeEach(async function () {
       const railsEscrowArtifact: Artifact = await hre.artifacts.readArtifact("RailsEscrow");
       this.escrow = <RailsEscrow>await deployContract(this.signers.admin, railsEscrowArtifact);
@@ -28,5 +28,13 @@ describe("Unit tests", function () {
 
     shouldAddAndRemoveAssets();
     shouldAddAndRemoveSellers();
+  });
+
+  describe('RailsEscrow: Add and Remove Liquidity', function () {
+    beforeEach(async function () {
+      const railsEscrowArtifact: Artifact = await hre.artifacts.readArtifact("RailsEscrow");
+      this.escrow = <RailsEscrow>await deployContract(this.signers.admin, railsEscrowArtifact);
+      
+    });
   });
 });
