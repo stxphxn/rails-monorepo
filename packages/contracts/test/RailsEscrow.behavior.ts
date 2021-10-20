@@ -1,8 +1,7 @@
-import { BigNumber, ContractReceipt } from "ethers";
+import { BigNumber, ContractReceipt, Signer, Wallet } from "ethers";
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
-import { randomBytes } from "ethers/lib/utils";
-import { decode } from "punycode";
+import { defaultAbiCoder, randomBytes, solidityKeccak256, arrayify, splitSignature, Bytes } from "ethers/lib/utils";
 
 chai.use(solidity);
 
@@ -110,31 +109,98 @@ export const getSwapData = async (receipt: ContractReceipt, eventName: string) =
   const idx = receipt.events?.findIndex((e) => e.event === eventName) ?? -1;
   const decoded = receipt.events![idx].decode!(receipt.events![idx].data, receipt.events![idx].topics);
   return {
-    buyer: decoded[1][0],
-    seller: decoded[1][1],
-    oracle: decoded[1][2],
-    assetId: decoded[1][3],
-    amount: decoded[1][4],
-    swapId: decoded[1][5],
-    currencyHash: decoded[1][6],
-    prepareBlockNumber: decoded[1][7],
-    expiry: decoded[1][8],
+    swapHash: decoded[0],
+    swapData: {
+      buyer: decoded[1][0],
+      seller: decoded[1][1],
+      oracle: decoded[1][2],
+      assetId: decoded[1][3],
+      amount: decoded[1][4],
+      swapId: decoded[1][5],
+      currencyHash: decoded[1][6],
+      prepareBlockNumber: decoded[1][7],
+      expiry: decoded[1][8],
+   }
+}
+};
+
+export const tidy = (str: string): string => `${str.replace(/\n/g, "").replace(/ +/g, " ")}`;
+
+export const SignedFulfillDataEncoding = tidy(`tuple(
+  string functionIdentifier,
+  bytes32 swapHash
+)`);
+
+export const encodeSignatureData = (type: string, swapHash: Bytes): string => {
+  return defaultAbiCoder.encode(
+    [SignedFulfillDataEncoding],
+    [{ functionIdentifier: type, swapHash: swapHash}],
+  );
+};
+
+const sanitizeSignature = (sig: string): string => {
+  if (sig.endsWith("1c") || sig.endsWith("1b")) {
+    return sig;
   }
+
+  // Must be sanitized
+  const { v } = splitSignature(sig);
+  const hex = BigNumber.from(v).toHexString();
+  return sig.slice(0, sig.length - 2) + hex.slice(2);
+};
+
+const sign = async (hash: string, signer: Wallet | Signer): Promise<string> => {
+  const msg = arrayify(hash);
+  return sanitizeSignature(await signer.signMessage(msg));
 };
 
 export function shouldFulfil(): void {
   it('should let the seller fulfil the swap', async function () {
     const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
-    await expect(this.escrow.fulfil(swapData, randomBytes(32)))
+    await expect(this.escrow.fulfil(swapData.swapData, randomBytes(32)))
     .to.emit(this.escrow, 'SwapFulfiled');
+
+    const tokens = await this.erc20.balanceOf(this.signers.buyer.address);
+    await expect(tokens).to.equal(BigNumber.from('5'));
+  });
+
+  it('should let the buyer fulfil with a signature from the oracle', async function () {
+    const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
+
+    const payload = encodeSignatureData('fulfil', swapData.swapHash);
+    const hash = solidityKeccak256(['bytes'], [payload]);
+    const signature = await sign(hash, this.signers.oracle);
+
+    await expect(this.buyerEscrow.fulfil(swapData.swapData, signature))
+    .to.emit(this.escrow, 'SwapFulfiled');
+
+    const tokens = await this.erc20.balanceOf(this.signers.buyer.address);
+    await expect(tokens).to.equal(BigNumber.from('5'));
   });
 }
 
 export function shouldCancel(): void {
   it('should let the buyer cancel the swap', async function () {
     const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
-    await expect(this.buyerEscrow.cancel(swapData, randomBytes(32)))
+    await expect(this.buyerEscrow.cancel(swapData.swapData, randomBytes(32)))
     .to.emit(this.escrow, 'SwapCancelled');
+
+    const sellerLiquidity = await this.escrow.sellerBalances(this.signers.seller.address, this.erc20.address);
+    await expect(sellerLiquidity).to.equal(BigNumber.from('10'));
+  });
+
+  it('should let the swap be cancelled with a signature', async function () {
+    const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
+
+    const payload = encodeSignatureData('cancel', swapData.swapHash);
+    const hash = solidityKeccak256(['bytes'], [payload]);
+    const signature = await sign(hash, this.signers.oracle);
+
+    await expect(this.buyerEscrow.cancel(swapData.swapData, signature))
+    .to.emit(this.escrow, 'SwapCancelled');
+
+    const sellerLiquidity = await this.escrow.sellerBalances(this.signers.seller.address, this.erc20.address);
+    await expect(sellerLiquidity).to.equal(BigNumber.from('10'));
   });
 }
 
