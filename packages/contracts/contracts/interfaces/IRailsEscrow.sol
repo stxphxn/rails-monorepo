@@ -52,11 +52,11 @@ interface IRailsEscrow {
   event LiquidityRemoved(address indexed seller, address indexed assetId, uint256 amount, address recipient);
 
   // Swap events
-  event SwapPrepared(bytes32 swapHash, address caller);
+  event SwapPrepared(bytes32 swapHash, SwapData swapData, address caller);
 
-  event SwapFulfiled(bytes32 swapHash, address caller);
+  event SwapFulfiled(bytes32 swapHash, SwapData swapData, address caller);
 
-  event SwapCancelled(bytes32 swapHash, address caller);
+  event SwapCancelled(bytes32 swapHash, SwapData swapData, address caller);
 
   
   function addSeller(address seller) external;

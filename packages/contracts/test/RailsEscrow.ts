@@ -9,7 +9,10 @@ import {
   shouldAddAndRemoveAssets,
   shouldAddAndRemoveSellers,
   shouldAddAndRemoveLiqudity,
-  shouldPrepare
+  shouldPrepare,
+  shouldFulfil,
+  getSwapData,
+  shouldCancel
 } from "./RailsEscrow.behavior";
 
 
@@ -70,7 +73,8 @@ describe("Unit tests", function () {
     shouldPrepare();
   });
 
-  describe('RailsEscrow: Fulfil', function () {
+
+  describe('RailsEscrow: Fulfil and Cancel', function () {
     beforeEach(async function () {
       const railsEscrowArtifact: Artifact = await hre.artifacts.readArtifact("RailsEscrow");
       const erc20Artifact: Artifact = await hre.artifacts.readArtifact("RevertableERC20");
@@ -94,11 +98,12 @@ describe("Unit tests", function () {
         swapId: 1,
         currencyHash: '0x498085903',
       }
-      const buyerEscrow = await this.escrow.connect(this.signers.buyer);
-
-      this.swapData = await buyerEscrow.prepare(swapInfo);
+      this.buyerEscrow = await this.escrow.connect(this.signers.buyer);
+      const prepareTx = await this.buyerEscrow.prepare(swapInfo);
+      this.swapReceipt = await prepareTx.wait();
     });
 
-    shouldPrepare();
+    shouldFulfil();
+    shouldCancel();
   });
 });

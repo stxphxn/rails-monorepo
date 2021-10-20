@@ -1,6 +1,8 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ContractReceipt } from "ethers";
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
+import { randomBytes } from "ethers/lib/utils";
+import { decode } from "punycode";
 
 chai.use(solidity);
 
@@ -101,6 +103,38 @@ export function shouldPrepare(): void {
     
     const sellerLiquidity = await this.escrow.sellerBalances(this.signers.seller.address, this.erc20.address);
     await expect(sellerLiquidity).to.equal(BigNumber.from('5'));
+  });
+}
+
+export const getSwapData = async (receipt: ContractReceipt, eventName: string) => {
+  const idx = receipt.events?.findIndex((e) => e.event === eventName) ?? -1;
+  const decoded = receipt.events![idx].decode!(receipt.events![idx].data, receipt.events![idx].topics);
+  return {
+    buyer: decoded[1][0],
+    seller: decoded[1][1],
+    oracle: decoded[1][2],
+    assetId: decoded[1][3],
+    amount: decoded[1][4],
+    swapId: decoded[1][5],
+    currencyHash: decoded[1][6],
+    prepareBlockNumber: decoded[1][7],
+    expiry: decoded[1][8],
+  }
+};
+
+export function shouldFulfil(): void {
+  it('should let the seller fulfil the swap', async function () {
+    const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
+    await expect(this.escrow.fulfil(swapData, randomBytes(32)))
+    .to.emit(this.escrow, 'SwapFulfiled');
+  });
+}
+
+export function shouldCancel(): void {
+  it('should let the buyer cancel the swap', async function () {
+    const swapData = await getSwapData(this.swapReceipt, 'SwapPrepared');
+    await expect(this.buyerEscrow.cancel(swapData, randomBytes(32)))
+    .to.emit(this.escrow, 'SwapCancelled');
   });
 }
 
