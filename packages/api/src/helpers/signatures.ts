@@ -1,5 +1,7 @@
-import { BigNumber, ContractReceipt, Signer, Wallet } from 'ethers';
+import { BigNumber, ContractReceipt } from 'ethers';
 import { defaultAbiCoder, solidityKeccak256, arrayify, splitSignature, Bytes } from 'ethers/lib/utils';
+
+import { wallet } from "../helpers/getWallet";
 
 export const tidy = (str: string): string => `${str.replace(/\n/g, "").replace(/ +/g, " ")}`;
 
@@ -38,7 +40,7 @@ export const encodeSignatureData = (type: string, swapHash: Bytes): string => {
 };
 
 const sanitizeSignature = (sig: string): string => {
-  if (sig.endsWith("1c") || sig.endsWith("1b")) {
+  if (sig.endsWith('1c') || sig.endsWith('1b')) {
     return sig;
   }
 
@@ -48,7 +50,13 @@ const sanitizeSignature = (sig: string): string => {
   return sig.slice(0, sig.length - 2) + hex.slice(2);
 };
 
-const sign = async (hash: string, signer: Wallet | Signer): Promise<string> => {
+export const sign = async (hash: string): Promise<string> => {
   const msg = arrayify(hash);
-  return sanitizeSignature(await signer.signMessage(msg));
+  return sanitizeSignature(await wallet.signMessage(msg));
 };
+
+export const createSignature = async (type: string, swapHash: Bytes): Promise<string> => {
+  const payload = encodeSignatureData(type, swapHash);
+  const hash = solidityKeccak256(['bytes'], [payload]);
+  return sign(hash);
+}
