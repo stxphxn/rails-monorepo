@@ -1,9 +1,8 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth } from '../helpers/createPaymentAuth';
 
-import { getSwapHash } from '../utils/getSwapHash';
 import { verifySignature } from '../utils/verifySignature';
-import { createSignature } from '../utils/createSignature';
+import { getSwapHash, createSignature } from '../helpers/signatures';
 
 import { 
   PaymentDetails,
@@ -46,7 +45,7 @@ export const prepare = async (request: Request): Promise<Response> => {
   const paymentAuth = await createPaymentAuth(paymentDetails);
   
   // create oracle signature 
-  const signature = await createSignature(swapHash);
+  const signature = await createSignature('prepare', swapHash);
   
   // response
   const response: PrepareSwapResponse = {

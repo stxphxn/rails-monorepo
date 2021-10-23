@@ -125,9 +125,8 @@ export type SwapInfo = {
   buyer: string,
   seller: string,
   oracle: string,
-  token: string,
+  assetId: string,
   amount: number,
-  expiry: number,
 }
 
 export type CurrencyDetails = {
