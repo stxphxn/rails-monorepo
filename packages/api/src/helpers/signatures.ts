@@ -2,6 +2,7 @@ import { BigNumber, ContractReceipt } from 'ethers';
 import { defaultAbiCoder, solidityKeccak256, arrayify, splitSignature, Bytes } from 'ethers/lib/utils';
 
 import { wallet } from "../helpers/getWallet";
+import { SwapInfo, CurrencyDetails } from '../types';
 
 export const tidy = (str: string): string => `${str.replace(/\n/g, "").replace(/ +/g, " ")}`;
 
@@ -9,6 +10,16 @@ export const SignedDataEncoding = tidy(`tuple(
   string functionIdentifier,
   bytes32 swapHash
 )`);
+
+export const SwapInfoEncoding = tidy(`tuple(
+  address buyer,
+  address seller,
+  address oracle,
+  address assetId,
+  uint256 amount,
+  uint256 swapId,
+  string currencyHash,
+)`)
 
 
 export const getSwapData = async (receipt: ContractReceipt, eventName: string) => {
@@ -55,8 +66,32 @@ export const sign = async (hash: string): Promise<string> => {
   return sanitizeSignature(await wallet.signMessage(msg));
 };
 
-export const createSignature = async (type: string, swapHash: Bytes): Promise<string> => {
-  const payload = encodeSignatureData(type, swapHash);
+export const getCurrencyHash = (currencyDetails: CurrencyDetails): string => {
+  return solidityKeccak256(['bytes'],[defaultAbiCoder.encode(
+    ['string', 'uint256'],
+    [currencyDetails.currency, currencyDetails.exchangeRate],
+  )]);
+};
+
+export const getSwapHash = (swapInfo: SwapInfo, currencyDetails: CurrencyDetails): string => {
+  const currencyHash = getCurrencyHash(currencyDetails);
+
+  return solidityKeccak256(['bytes'],[defaultAbiCoder.encode(
+    [SwapInfoEncoding],
+    [{
+      buyer: swapInfo.buyer,
+      seller: swapInfo.seller,
+      oracle: swapInfo.oracle,
+      assetId: swapInfo.assetId,
+      amount: swapInfo.amount,
+      swapId: 1,
+      currencyHash: currencyHash, 
+    }],
+  )]);
+}
+
+export const createSignature = async (type: string, swapHash: string): Promise<string> => {
+  const payload = encodeSignatureData(type, arrayify(swapHash));
   const hash = solidityKeccak256(['bytes'], [payload]);
   return sign(hash);
 }
