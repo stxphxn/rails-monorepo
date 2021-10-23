@@ -11,7 +11,7 @@ export const SignedDataEncoding = tidy(`tuple(
 )`);
 
 
-export const getSwapData = async (receipt: ContractReceipt, eventName: string) => {
+export const getSwapData = async (receipt: ContractReceipt, eventName: string): Promise<any> => {
   const idx = receipt.events?.findIndex((e) => e.event === eventName) ?? -1;
   const decoded = receipt.events![idx].decode!(receipt.events![idx].data, receipt.events![idx].topics);
   return {
