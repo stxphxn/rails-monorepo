@@ -1,7 +1,7 @@
 import { checkTransaction } from "../helpers/checkTransaction";
 import { fetchConsentToken } from "../helpers/fetchConsentToken";
+import { createSignature, getSwapHash } from "../helpers/signatures";
 import { CurrencyDetails, SwapInfo } from "../types";
-import { getSwapHash } from "../utils/getSwapHash";
 
 export type FulfilSwapRequestBody = {
   swapInfo: SwapInfo,
@@ -31,9 +31,13 @@ export const fulfil = async (request: Request): Promise<Response> => {
   }
   
   // TODO: create release signature
+  const signature = await createSignature('fulfil', swapHash);
 
+  const response = {
+    signature,
+  }
 
-  return new Response('response',
+  return new Response(JSON.stringify(response),
   {
     headers: {
       "content-type": 'application/json'
