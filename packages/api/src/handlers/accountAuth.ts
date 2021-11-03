@@ -10,12 +10,16 @@ const accountAuth = async (request: Request): Promise<Response> => {
 
   const body = await request.json();
 
+  // check parameters are valid
   const reqBody: AccountAuthorisationRequest = {
     applicationUserId: body.applicationUserId,
     institutionId: body.institutionId,
     callback: "https://display-parameters.com/"
   }
 
+  // check seller is approved
+
+  // call api
   const data = await authCall('https://api.yapily.com/account-auth-requests', reqBody, 'POST');
   const json = JSON.stringify(data);
 

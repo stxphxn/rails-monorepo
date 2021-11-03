@@ -24,7 +24,9 @@ export const prepare = async (request: Request): Promise<Response> => {
   const swapHash = getSwapHash(swapInfo, currencyDetails);
   const verifySig = (signature: Signature) => verifySignature(signature.address, swapHash, signature.sig);
   if (!signatures.every(verifySig)) throw Error('invalid signature/s');
-  
+
+  // check valid seller and has liquidity  
+
   // fetch seller account details
   const accountDetails = await fetchAccountDetails(swapInfo.seller, body.sellerInstitution);
 

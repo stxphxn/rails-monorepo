@@ -36,6 +36,11 @@ interface IRailsEscrow {
     uint256 prepareBlockNumber;
   }
 
+  // Adding/removing oracle events
+  event OracleAdded(address indexed addedOracle, address indexed caller);
+
+  event OracleRemoved(address indexed removedOracle, address indexed caller);
+
   // Adding/removing seller events
   event SellerAdded(address indexed addedSeller, address indexed caller);
 
@@ -62,6 +67,10 @@ interface IRailsEscrow {
   function addSeller(address seller) external;
 
   function removeSeller(address seller) external;
+
+  function addOracle(address orcale) external;
+
+  function removeOracle(address oracle) external;
 
   function addAssetId(address assetId) external;
 

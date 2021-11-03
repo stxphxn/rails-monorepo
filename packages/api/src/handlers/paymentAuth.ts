@@ -11,6 +11,7 @@ const paymentAuth = async (request: Request): Promise<Response> => {
 
   const body = await request.json();
 
+  // check parameters are valid
   const reqBody = {
     applicationUserId: body.applicationUserId,
     institutionId: body.institutionId,
@@ -18,6 +19,7 @@ const paymentAuth = async (request: Request): Promise<Response> => {
     paymentRequest: body.paymentRequest as PaymentRequest,
   };
 
+  // call api
   const data = await authCall('https://api.yapily.com/payment-auth-requests', reqBody, 'POST');
   const json = JSON.stringify(data);
 

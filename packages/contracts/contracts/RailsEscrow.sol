@@ -18,6 +18,11 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @dev Mapping of seller to balance specific to asset
       */
     mapping(address => mapping(address => uint256)) public sellerBalances;
+
+    /**
+      * @dev Mapping of allowed seller addresses. Must be added to both
+      */
+    mapping(address => bool) public approvedOracles;
     
     /**
       * @dev Mapping of allowed seller addresses. Must be added to both
@@ -34,6 +39,42 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
      * After the end time the swap can be cancelled, and the funds will be returned to the pool.
      */
     mapping (bytes32 => bytes32) internal swaps;
+
+    /**
+      * @notice Used to add oracles that can add prepare and fulfil swaps
+      * @param oracle oracle address to add
+      */
+    function addOracle(address oracle) external override onlyOwner {
+        // Sanity check: not empty
+        require(oracle != address(0), "#AS:001");
+
+        // Sanity check: needs approval
+        require(approvedOracles[oracle] == false, "#AS:032");
+
+        // Update mapping
+        approvedOracles[oracle] = true;
+
+        // Emit event
+        emit OracleAdded(oracle, msg.sender);
+    }
+
+    /**
+      * @notice Used to remove oracles that can prepare and fulfil swaps
+      * @param oracle Oracle address to remove
+      */
+    function removeOracle(address oracle) external override onlyOwner {
+        // Sanity check: not empty
+        require(oracle != address(0), "#RS:001");
+
+        // Sanity check: needs approval
+        require(approvedOracles[oracle] == true, "#RS:032");
+
+        // Update mapping
+        approvedOracles[oracle] = false;
+
+        // Emit event
+        emit OracleRemoved(oracle, msg.sender);
+    }
 
     /**
       * @notice Used to add sellers that can add liqudity
