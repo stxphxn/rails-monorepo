@@ -19,10 +19,6 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       */
     mapping(address => mapping(address => uint256)) public sellerBalances;
 
-    /**
-      * @dev Mapping of allowed seller addresses. Must be added to both
-      */
-    mapping(address => bool) public approvedOracles;
     
     /**
       * @dev Mapping of allowed seller addresses. Must be added to both
@@ -39,42 +35,6 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
      * After the end time the swap can be cancelled, and the funds will be returned to the pool.
      */
     mapping (bytes32 => bytes32) internal swaps;
-
-    /**
-      * @notice Used to add oracles that can add prepare and fulfil swaps
-      * @param oracle oracle address to add
-      */
-    function addOracle(address oracle) external override onlyOwner {
-        // Sanity check: not empty
-        require(oracle != address(0), "#AS:001");
-
-        // Sanity check: needs approval
-        require(approvedOracles[oracle] == false, "#AS:032");
-
-        // Update mapping
-        approvedOracles[oracle] = true;
-
-        // Emit event
-        emit OracleAdded(oracle, msg.sender);
-    }
-
-    /**
-      * @notice Used to remove oracles that can prepare and fulfil swaps
-      * @param oracle Oracle address to remove
-      */
-    function removeOracle(address oracle) external override onlyOwner {
-        // Sanity check: not empty
-        require(oracle != address(0), "#RS:001");
-
-        // Sanity check: needs approval
-        require(approvedOracles[oracle] == true, "#RS:032");
-
-        // Update mapping
-        approvedOracles[oracle] = false;
-
-        // Emit event
-        emit OracleRemoved(oracle, msg.sender);
-    }
 
     /**
       * @notice Used to add sellers that can add liqudity
@@ -195,30 +155,31 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
     }
 
     function prepare(
-        SwapInfo calldata swapInfo
-    ) external override nonReentrant returns(SwapData memory) {
+        SwapInfo calldata swapInfo,
+        bytes calldata prepareSignature
+    ) external override nonReentrant returns(SwapData memory) {       
         // Sanity check: buyer is sensible
         require(swapInfo.buyer != address(0), "#P:001");
 
         // Sanity check: seller is sensible
         require(swapInfo.seller != address(0), "#P:002");
 
-        // Check oracle is approved
-        require(approvedSellers[swapInfo.oracle], "#P:003");
-
         // Check seller is approved
-        require(approvedSellers[swapInfo.seller], "#P:003");
+        require(approvedSellers[swapInfo.seller], "#P:004");
 
         // check asset is approved
-        require(approvedAssets[swapInfo.assetId], "#P:004");
+        require(approvedAssets[swapInfo.assetId], "#P:005");
 
         // check seller has enough liquidity
         uint256 balance = sellerBalances[swapInfo.seller][swapInfo.assetId];
-        require(balance >= swapInfo.amount, "#P:005");
+        require(balance >= swapInfo.amount, "#P:006");
 
         // check swap doesn't already exist
         bytes32 digest = keccak256(abi.encode(swapInfo));
-        require(swaps[digest] == 0, "#P:006");
+        require(swaps[digest] == 0, "#P:007");
+
+        // Validate signature
+        require(msg.sender == owner() || _recoverFuncSignature(digest, "prepare", prepareSignature) == owner(), "#F:02");
 
         uint32 expiry = uint32(block.timestamp) + SWAP_LOCK_TIME;
         // store swap expiry
@@ -263,7 +224,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         require(swapData.prepareBlockNumber > 0, "#F:021");
 
         // Validate signature
-        require(msg.sender == swapData.seller || _recoverFulfilSignature(digest, fulfilSignature) == swapData.oracle, "#F:02");
+        require(msg.sender == swapData.seller || _recoverFuncSignature(digest, "fulfil", fulfilSignature) == owner(), "#F:02");
         
         // To prevent a swap from being repeated the prepareBlockNumber is set to 0 before being hashed
         swaps[digest] = _hashSwapTransactionData(swapData.amount, swapData.expiry, 0);
@@ -290,7 +251,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         if (swapData.expiry >= block.timestamp) {
           // Timeout has not expired and swap may only be cancelled by the buyer
           // Validate signature
-          require(msg.sender == swapData.buyer || _recoverCancelSignature(digest, cancelSignature) == swapData.buyer, "#C:025");
+          require(msg.sender == swapData.buyer || _recoverFuncSignature(digest, "cancel", cancelSignature) == swapData.buyer, "#C:025");
         }
         
         // To prevent a swap from being repeated the prepareBlockNumber is set to 0 before being hashed
@@ -361,13 +322,14 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @param swapHash The swap hash
       * @param signature The signature you are recovering the signer from
       */
-    function _recoverFulfilSignature(
+    function _recoverFuncSignature(
       bytes32 swapHash,
+      string memory func,
       bytes calldata signature
     ) internal pure returns (address) {
         // Create the signed payload
         SignedFulfilData memory payload = SignedFulfilData({
-          functionIdentifier: "fulfil",
+          functionIdentifier: func,
           swapHash: swapHash
         });
 
@@ -375,24 +337,6 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         return _recoverSignature(abi.encode(payload), signature);
     }
 
-          /**
-      * @notice Recovers the signer from the signature provided by the buyer
-      * @param swapHash The swap hash
-      * @param signature The signature you are recovering the signer from
-      */
-    function _recoverCancelSignature(
-      bytes32 swapHash,
-      bytes calldata signature
-    ) internal pure returns (address) {
-        // Create the signed payload
-        SignedFulfilData memory payload = SignedFulfilData({
-          functionIdentifier: "cancel",
-          swapHash: swapHash
-        });
-
-        // Recover
-        return _recoverSignature(abi.encode(payload), signature);
-    }
 
     /**
     * @notice Holds the logic to recover the signer from an encoded payload.

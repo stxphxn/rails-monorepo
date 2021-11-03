@@ -9,6 +9,7 @@
     "bootstrap": "lerna bootstrap"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2",
     "ethers": "^5.4.3",
     "typescript": "^4.4.4"
   }
