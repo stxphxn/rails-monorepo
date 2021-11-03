@@ -203,6 +203,9 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // Sanity check: seller is sensible
         require(swapInfo.seller != address(0), "#P:002");
 
+        // Check oracle is approved
+        require(approvedSellers[swapInfo.oracle], "#P:003");
+
         // Check seller is approved
         require(approvedSellers[swapInfo.seller], "#P:003");
 
