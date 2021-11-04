@@ -1,5 +1,5 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
-import { createPaymentAuth } from '../helpers/createPaymentAuth';
+import { createPaymentAuth, getReference } from '../helpers/createPaymentAuth';
 
 import { verifySignature } from '../utils/verifySignature';
 import { getSwapHash, createSignature } from '../helpers/signatures';
@@ -48,6 +48,16 @@ export const prepare = async (request: Request): Promise<Response> => {
   
   // create oracle signature 
   const signature = await createSignature('prepare', swapHash);
+
+  const swap = {
+    swapInfo,
+    currencyDetails,
+    signature,
+    reference: getReference(swapHash),
+    status: 'PREPARE',
+  }
+
+  await SWAPS_DB.put(JSON.stringify(swap));
   
   // response
   const response: PrepareSwapResponse = {
