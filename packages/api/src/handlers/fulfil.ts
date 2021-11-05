@@ -1,12 +1,11 @@
 import { checkTransaction } from "../helpers/checkTransaction";
-import { fetchConsentToken } from "../helpers/fetchConsentToken";
-import { createSignature, getSwapHash } from "../helpers/signatures";
-import { CurrencyDetails, SwapInfo } from "../types";
+import { createSignature, encodeSwapInfo, getSwapHash } from "../helpers/signatures";
+import { SwapData } from "../types";
 
 export type FulfilSwapRequestBody = {
-  swapInfo: SwapInfo,
+  swapHash: string,
+  swapData: SwapData,
   sellerInstitution: string,
-  currencyDetails: CurrencyDetails
 }
 
 export const fulfil = async (request: Request): Promise<Response> => {
@@ -16,16 +15,21 @@ export const fulfil = async (request: Request): Promise<Response> => {
     });
   }
   const body: FulfilSwapRequestBody = await request.json();
-  const { swapInfo, currencyDetails } = body;
+  const { swapHash } = body;
 
-  // TODO: check for valid swap hash 
-  const swapHash = getSwapHash(swapInfo, currencyDetails);
-  
+  // // TODO: check for valid swap
+  // const encodedSwapData = encodeSwapInfo(swapData, swapData.swapId, swapData.currencyHash);
+  // const swapHash = getSwapHash(encodedSwapData);
+  // if (!(await SWAPS_DB.get(swapHash))) throw Error('No swap found');
+
+  const swap = JSON.parse(await SWAPS_DB.get(swapHash));
+  if (!swap) throw Error('Swap not found');
+  if (swap.status !== 'PREPARE') throw Error('Swap already fulfiled');
   // TODO: fetch seller consent token
-  const { consentToken, id } = await fetchConsentToken(swapInfo.seller, body.sellerInstitution);
+  const { consentToken, id } = JSON.parse(await SELLERS_DB.get(swap.swapData.seller));
   
   // TODO: check for payment transaction
-  const received = await checkTransaction(consentToken, id,  swapHash, swapInfo.amount);
+  const received = await checkTransaction(consentToken, id,  swapHash, swap.swapData.amount);
   if (!received) {
     throw new Error('Payment not found');
   }
@@ -34,6 +38,7 @@ export const fulfil = async (request: Request): Promise<Response> => {
   const signature = await createSignature('fulfil', swapHash);
 
   const response = {
+    swapData: swap.swapData,
     signature,
   }
 

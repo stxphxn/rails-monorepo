@@ -9,8 +9,7 @@ type AccountDetailsResponse = {
   name: string,
 }
 
-export const fetchAccountDetails = async (account: string, institutionId: string): Promise<AccountDetailsResponse> => {
-  const { consentToken } = await fetchConsentToken(account, institutionId);
+export const fetchAccountDetails = async (consentToken: string): Promise<AccountDetailsResponse> => {
   const response = await authCall('https://api.yapily.com/accounts', undefined, 'GET', consentToken);
   const {accountIdentifications, currency, accountType, accountNames} = response.data[0];
   return {

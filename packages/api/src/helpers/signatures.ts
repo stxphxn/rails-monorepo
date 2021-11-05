@@ -41,7 +41,20 @@ export const getSwapData = async (receipt: ContractReceipt, eventName: string): 
 }
 };
 
-
+export const encodeSwapInfo = (swapInfo: SwapInfo, swapId: number, currencyHash: string): string => {
+  return defaultAbiCoder.encode(
+    [SwapInfoEncoding],
+    [{
+      buyer: swapInfo.buyer,
+      seller: swapInfo.seller,
+      oracle: swapInfo.oracle,
+      assetId: swapInfo.assetId,
+      amount: swapInfo.amount,
+      swapId: swapId,
+      currencyHash: currencyHash, 
+    }],
+  )
+};
 
 export const encodeSignatureData = (type: string, swapHash: Bytes): string => {
   return defaultAbiCoder.encode(
@@ -73,21 +86,8 @@ export const getCurrencyHash = (currencyDetails: CurrencyDetails): string => {
   )]);
 };
 
-export const getSwapHash = (swapInfo: SwapInfo, currencyDetails: CurrencyDetails): string => {
-  const currencyHash = getCurrencyHash(currencyDetails);
-
-  return solidityKeccak256(['bytes'],[defaultAbiCoder.encode(
-    [SwapInfoEncoding],
-    [{
-      buyer: swapInfo.buyer,
-      seller: swapInfo.seller,
-      oracle: swapInfo.oracle,
-      assetId: swapInfo.assetId,
-      amount: swapInfo.amount,
-      swapId: 1,
-      currencyHash: currencyHash, 
-    }],
-  )]);
+export const getSwapHash = (encodedSwapInfo: string): string => {
+  return solidityKeccak256(['bytes'],[encodedSwapInfo]);
 }
 
 export const createSignature = async (type: string, swapHash: string): Promise<string> => {

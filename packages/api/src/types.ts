@@ -129,6 +129,16 @@ export type SwapInfo = {
   amount: number,
 }
 
+export type SwapData = {
+  buyer: string,
+  seller: string,
+  oracle: string,
+  assetId: string,
+  amount: number,
+  swapId: number,
+  currencyHash: string,
+}
+
 export type CurrencyDetails = {
   exchangeRate: number,
   currency: string,

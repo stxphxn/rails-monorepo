@@ -1,14 +1,12 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth, getReference } from '../helpers/createPaymentAuth';
 
-import { verifySignature } from '../utils/verifySignature';
-import { getSwapHash, createSignature } from '../helpers/signatures';
+import { getSwapHash, createSignature, encodeSwapInfo, getCurrencyHash } from '../helpers/signatures';
 
 import { 
   PaymentDetails,
   PrepareSwapRequestBody,
   PrepareSwapResponse,
-  Signature,
  } from '../types';
 
 export const prepare = async (request: Request): Promise<Response> => {
@@ -18,19 +16,23 @@ export const prepare = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const {swapInfo, currencyDetails, signatures} = body;
+  const {swapInfo, currencyDetails} = body;
   
-  // check signature against swap details
-  const swapHash = getSwapHash(swapInfo, currencyDetails);
-  const verifySig = (signature: Signature) => verifySignature(signature.address, swapHash, signature.sig);
-  if (!signatures.every(verifySig)) throw Error('invalid signature/s');
-
+  
+  // create swap id
+  const swapId = SWAPS_DB.list.length + 1
+  // create swap hash
+  const currencyHash = getCurrencyHash(currencyDetails);
+  const encodedSwapData = encodeSwapInfo(swapInfo, swapId, currencyHash);
+  const swapHash = getSwapHash(encodedSwapData);
+  
   // check valid seller and has liquidity  
 
-  // fetch seller account details
-  const accountDetails = await fetchAccountDetails(swapInfo.seller, body.sellerInstitution);
+  // fetch seller consent token and account details
+  const { consentToken } = JSON.parse(await SELLERS_DB.get(swapInfo.seller));
+  const accountDetails = await fetchAccountDetails(consentToken);
 
-  // create payment autorisation
+  // create payment autorisations
   const paymentDetails: PaymentDetails = {
     amount: {
       amount: (swapInfo.amount * currencyDetails.exchangeRate),
@@ -49,7 +51,9 @@ export const prepare = async (request: Request): Promise<Response> => {
   // create oracle signature 
   const signature = await createSignature('prepare', swapHash);
 
+  // Add swap tothe db
   const swap = {
+    paymentDetails,
     swapInfo,
     currencyDetails,
     signature,
@@ -57,12 +61,13 @@ export const prepare = async (request: Request): Promise<Response> => {
     status: 'PREPARE',
   }
 
-  await SWAPS_DB.put(JSON.stringify(swap));
+  await SWAPS_DB.put(swapHash, JSON.stringify(swap));
   
   // response
   const response: PrepareSwapResponse = {
     signature,
     paymentAuth,
+    encodedSwapData,
   }
   
   return new Response(JSON.stringify(response),
