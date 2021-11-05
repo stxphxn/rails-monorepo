@@ -1,14 +1,17 @@
 name = "api"
 type = "javascript"
 zone_id = ""
-account_id = "70b6d283d17368dca5d5613c762ffdb4"
+account_id = ""
 route = ""
 workers_dev = true
 kv_namespaces = [
-  { binding = "SELLERS_DB", id = "02318cee2f444ee1a56bc5871c14b14a" },
-  { binding = "SWAPS_DB", id = "0666c50bab8d48aa9721678ce049db2c" }
+  { binding = "SELLERS_DB", id = "02318cee2f444ee1a56bc5871c14b14a", preview_id = "90a85c37f62249bfa6e9d0e39b7c08d5" },
+  { binding = "SWAPS_DB", id = "0666c50bab8d48aa9721678ce049db2c", preview_id = "22430973ad694da297c6ff895d9eb875" }
 ]
-
+[vars]
+YAPILY_KEY = ''
+YAPILY_SECRET = ''
+MNEMONIC = ''
 [build]
 command = "npm install && npm run build"
 [build.upload]

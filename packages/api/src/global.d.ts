@@ -161,4 +161,7 @@ export interface CloudflareWorkerKVList {
 declare global {
   const SWAPS_DB: CloudflareWorkerKV;
   const SELLERS_DB: CloudflareWorkerKV;
+  const YAPILY_KEY: string;
+  const YAPILY_SECRET: string;
+  const MNEMONIC: string;
 }

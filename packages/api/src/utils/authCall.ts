@@ -1,4 +1,4 @@
-const authToken = btoa(`${process.env.YAPILY_KEY}:${process.env.YAPILY_SECRET}`);
+const authToken = btoa(`${YAPILY_KEY}:${YAPILY_SECRET}`);
 
 type AuthRequest = {
   method: string,

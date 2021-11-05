@@ -121,7 +121,7 @@ export type PaymentAuthResponse = {
   userUuid: string,
 };
 
-export type SwapInfo = {
+export type SwapDetails = {
   buyer: string,
   seller: string,
   oracle: string,
@@ -129,14 +129,14 @@ export type SwapInfo = {
   amount: number,
 }
 
-export type SwapData = {
-  buyer: string,
-  seller: string,
-  oracle: string,
-  assetId: string,
-  amount: number,
+export type SwapInfo =  SwapDetails & {
   swapId: number,
   currencyHash: string,
+}
+
+export type SwapData = SwapInfo & {
+  prepareBlockNumber: number,
+  expiry: number,
 }
 
 export type CurrencyDetails = {
@@ -150,7 +150,7 @@ export type Signature = {
 }
 
 export type PrepareSwapRequestBody = {
-  swapInfo: SwapInfo,
+  swapDetails: SwapDetails,
   currencyDetails: CurrencyDetails,
   sellerInstitution: string,
   buyerInstititution: string,
@@ -160,4 +160,6 @@ export type PrepareSwapRequestBody = {
 export type PrepareSwapResponse = {
   signature: string,
   paymentAuth: PaymentAuthResponse,
+  encodedSwapInfo: string,
+  swapInfo: SwapInfo,
 }

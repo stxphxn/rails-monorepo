@@ -29,7 +29,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       * @dev Mapping of allowed assetIds
       */
     mapping(address => bool) public approvedAssets;
-        
+      
     /**
      * @dev Mapping from swap details hash to its end time (as a unix timestamp).
      * After the end time the swap can be cancelled, and the funds will be returned to the pool.

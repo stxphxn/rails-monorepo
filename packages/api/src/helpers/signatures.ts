@@ -2,7 +2,7 @@ import { BigNumber, ContractReceipt } from 'ethers';
 import { defaultAbiCoder, solidityKeccak256, arrayify, splitSignature, Bytes } from 'ethers/lib/utils';
 
 import { wallet } from "../helpers/getWallet";
-import { SwapInfo, CurrencyDetails } from '../types';
+import { SwapInfo, CurrencyDetails, SwapData } from '../types';
 
 export const tidy = (str: string): string => `${str.replace(/\n/g, "").replace(/ +/g, " ")}`;
 
@@ -41,20 +41,22 @@ export const getSwapData = async (receipt: ContractReceipt, eventName: string): 
 }
 };
 
-export const encodeSwapInfo = (swapInfo: SwapInfo, swapId: number, currencyHash: string): string => {
+export const encodeSwapInfo = (swapInfo: SwapInfo | SwapData): string => {
+  const {buyer, seller, oracle, assetId, amount, swapId, currencyHash} = swapInfo
   return defaultAbiCoder.encode(
     [SwapInfoEncoding],
     [{
-      buyer: swapInfo.buyer,
-      seller: swapInfo.seller,
-      oracle: swapInfo.oracle,
-      assetId: swapInfo.assetId,
-      amount: swapInfo.amount,
-      swapId: swapId,
-      currencyHash: currencyHash, 
+      buyer,
+      seller,
+      oracle, 
+      assetId, 
+      amount, 
+      swapId, 
+      currencyHash,
     }],
   )
 };
+
 
 export const encodeSignatureData = (type: string, swapHash: Bytes): string => {
   return defaultAbiCoder.encode(
