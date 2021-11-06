@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@rails/api",
   "version": "1.0.0",
   "description": "Cloudflare worker TypeScript template",
   "main": "dist/worker.js",
@@ -24,6 +24,7 @@
     "@types/service-worker-mock": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
+    "@rails/contracts": "1.0.0",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-config-typescript": "^3.0.0",
@@ -37,6 +38,7 @@
     "webpack-cli": "^4.7.0"
   },
   "dependencies": {
-    "@yapily/yapily-api": "0.0.391"
+    "@yapily/yapily-api": "0.0.391",
+    "ethers": "^5.5.1"
   }
 }

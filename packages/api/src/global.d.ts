@@ -164,4 +164,6 @@ declare global {
   const YAPILY_KEY: string;
   const YAPILY_SECRET: string;
   const MNEMONIC: string;
+  const RPC_HOST: string;
+  const RAILS_ESCROW_ADDRESS: string;
 }

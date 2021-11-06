@@ -16,17 +16,20 @@ export const prepare = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const {swapDetails, currencyDetails} = body;
+  const {swapDetails, signatures, currencyDetails} = body;
 
   // check buyer signature
-  
-  
+
+  // check valid seller and has liquidity  
+
+  const { consentToken, currencyHash } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
+
   // create swap id
   const swapId = SWAPS_DB.list.length + 1
 
  
   // create swap hash
-  const currencyHash = getCurrencyHash(currencyDetails);
+  // const currencyHash = getCurrencyHash(currencyDetails);
   const swapInfo = {
     ...swapDetails,
     swapId,
@@ -35,10 +38,9 @@ export const prepare = async (request: Request): Promise<Response> => {
   const encodedSwapInfo = encodeSwapInfo(swapInfo);
   const swapHash = getSwapHash(encodedSwapInfo);
   
-  // check valid seller and has liquidity  
 
-  // fetch seller consent token and account details
-  const { consentToken } = JSON.parse(await SELLERS_DB.get(swapInfo.seller));
+
+  // fetch seller account details
   const accountDetails = await fetchAccountDetails(consentToken);
 
   // create payment autorisations
