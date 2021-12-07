@@ -1,26 +1,22 @@
 {
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es5", "es6"],
+    "lib": ["es6"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
-    "outDir": "dist",
+    "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es5"
+    "target": "es6"
   },
-  "exclude": ["artifacts", "node_modules"],
+  "exclude": ["node_modules"],
   "files": ["./hardhat.config.ts"],
-  "include": [
-    "artifacts/**/*",
-    "artifacts/**/*.json",
-    "scripts/**/*",
-    "tasks/**/*",
-    "test/**/*",
-    "typechain/**/*",
-    "types/**/*"
-  ]
+  "include": ["tasks/**/*", "test/**/*", "types/**/*"]
 }

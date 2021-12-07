@@ -4,7 +4,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 
 import "./tasks/accounts";
-import "./tasks/clean";
+import "./tasks/deploy";
 
 import { resolve } from "path";
 
@@ -15,7 +15,6 @@ import { NetworkUserConfig } from "hardhat/types";
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
 const chainIds = {
-  ganache: 1337,
   goerli: 5,
   hardhat: 31337,
   kovan: 42,
@@ -25,26 +24,21 @@ const chainIds = {
 };
 
 // Ensure that we have all the environment variables we need.
-let mnemonic: string;
-if (!process.env.MNEMONIC) {
+const mnemonic: string | undefined = process.env.MNEMONIC;
+if (!mnemonic) {
   throw new Error("Please set your MNEMONIC in a .env file");
-} else {
-  mnemonic = process.env.MNEMONIC;
 }
 
-let infuraApiKey: string;
-if (!process.env.INFURA_API_KEY) {
+const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
+if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
-} else {
-  infuraApiKey = process.env.INFURA_API_KEY;
 }
 
-function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig {
+function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
   const url: string = "https://" + network + ".infura.io/v3/" + infuraApiKey;
   return {
     accounts: {
       count: 10,
-      initialIndex: 0,
       mnemonic,
       path: "m/44'/60'/0'/0",
     },
@@ -68,10 +62,10 @@ const config: HardhatUserConfig = {
       },
       chainId: chainIds.hardhat,
     },
-    goerli: createTestnetConfig("goerli"),
-    kovan: createTestnetConfig("kovan"),
-    rinkeby: createTestnetConfig("rinkeby"),
-    ropsten: createTestnetConfig("ropsten"),
+    goerli: getChainConfig("goerli"),
+    kovan: getChainConfig("kovan"),
+    rinkeby: getChainConfig("rinkeby"),
+    ropsten: getChainConfig("ropsten"),
   },
   paths: {
     artifacts: "./artifacts",
@@ -87,7 +81,7 @@ const config: HardhatUserConfig = {
         // https://github.com/paulrberg/solidity-template/issues/31
         bytecodeHash: "none",
       },
-      // You should disable the optimizer when debugging
+      // Disable the optimizer when debugging
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
@@ -96,7 +90,7 @@ const config: HardhatUserConfig = {
     },
   },
   typechain: {
-    outDir: "typechain",
+    outDir: "src/types",
     target: "ethers-v5",
   },
 };

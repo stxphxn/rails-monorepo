@@ -1,6 +1,6 @@
 # Solidity Template
 
-My favourite setup for writing Solidity smart contracts.
+My favorite setup for writing Solidity smart contracts.
 
 - [Hardhat](https://github.com/nomiclabs/hardhat): compile and run the smart contracts on a local development network
 - [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript types for smart contracts
@@ -17,10 +17,13 @@ template" button at the top of the page.
 
 ### Pre Requisites
 
-Before running any command, make sure to install dependencies:
+Before running any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as an environment
+variable. Follow the example in `.env.example`. If you don't already have a mnemonic, use this [website](https://iancoleman.io/bip39/) to generate one.
+
+Then, proceed with installing dependencies:
 
 ```sh
-$ yarn install
+yarn install
 ```
 
 ### Compile
@@ -92,13 +95,7 @@ $ yarn clean
 Deploy the contracts to Hardhat Network:
 
 ```sh
-$ yarn deploy
-```
-
-Deploy the contracts to a specific network, such as the Ropsten testnet:
-
-```sh
-$ yarn deploy:network ropsten
+$ yarn deploy --greeting "Bonjour, le monde!"
 ```
 
 ## Syntax Highlighting

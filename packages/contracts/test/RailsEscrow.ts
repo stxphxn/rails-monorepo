@@ -3,8 +3,8 @@ import { Artifact } from "hardhat/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { BigNumber } from "ethers";
 
-import { RailsEscrow, RevertableERC20 } from "../typechain";
-import { Signers } from "../types";
+import { RailsEscrow, RevertableERC20 } from "../src/types";
+import { Signers } from "./types";
 import { 
   shouldAddAndRemoveAssets,
   shouldAddAndRemoveSellers,
