@@ -49,7 +49,3 @@ export const fulfil = async (request: Request): Promise<Response> => {
     }
   });
 };
-
-// pull seller crypto to arbiter
-
-// 

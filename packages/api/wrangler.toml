@@ -1,7 +1,7 @@
 name = "api"
 type = "javascript"
 zone_id = ""
-account_id = ""
+account_id = "75a476c00b36877af6724c55070c4c1c"
 route = ""
 workers_dev = true
 kv_namespaces = [
