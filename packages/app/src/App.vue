@@ -8,6 +8,26 @@
 </div>
 
 </template>
+<script lang="ts">
+import { useStore } from '@/store';
+import { computed } from 'vue';
+import User from './store/models/User';
+import router from './router';
+
+export default {
+  name: 'App',
+
+  setup() {
+    const store = useStore();
+    const user = computed(() => store.$repo(User).all());
+    if (user.value.length === 0) {
+      router.push('/login');
+    } else {
+      router.push('/');
+    }
+  },
+};
+</script>
 
 <style lang="scss">
 #app {

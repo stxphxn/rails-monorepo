@@ -9,21 +9,19 @@
 
 <script lang="ts">
 import { onMounted } from 'vue';
-// import ThresholdKey from '@tkey/default';
-// import TorusStorageLayer from '@tkey/storage-layer-torus';
-// import BaseServiceProvider from '@tkey/service-provider-base';
 import TorusServiceProvider from '@tkey/service-provider-torus';
-// import WebStorageModule from '@tkey/web-storage';
+import { useStore } from '@/store';
+import User from '@/store/models/User';
 // import ethers from 'ethers';
 
 export default {
   name: 'login',
 
   setup() {
-    console.log('loading');
-    // const webStorageModule = new WebStorageModule();
-    // const securityQuestionsModule = new SecurityQuestionsModule();
-    // const shareTransferModule = new ShareTransferModule();
+    const store = useStore();
+    console.log(store);
+    const userRepo = store.$repo(User);
+
     const serviceProvider = new TorusServiceProvider({
       directParams: {
         baseUrl: `${window.location.origin}/serviceworker`,
@@ -35,27 +33,23 @@ export default {
 
     const handleLogin = async () => {
       // triggers google login.
-      await serviceProvider.triggerHybridAggregateLogin({
-        singleLogin: {
-          typeOfLogin: 'google',
-          verifier: 'google-lrc',
-          clientId: '221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com',
-        },
-        aggregateLoginParams: {
-          aggregateVerifierType: 'single_id_verifier',
-          verifierIdentifier: 'tkey-google',
-          subVerifierDetailsArray: [
-            {
-              clientId: '221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com',
-              typeOfLogin: 'google',
-              verifier: 'torus',
-            },
-          ],
-        },
+
+      const loginDetails = await serviceProvider.triggerLogin({
+        typeOfLogin: 'google',
+        verifier: 'google-lrc',
+        clientId: '221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com',
+      });
+
+      console.log(loginDetails);
+      await userRepo.save({
+        publicAddress: loginDetails.publicAddress,
+        privateKey: loginDetails.privateKey,
+        name: loginDetails.userInfo.name,
+        email: loginDetails.userInfo.email,
       });
     };
 
-    onMounted(async () => serviceProvider.init({ skipSw: true }));
+    onMounted(async () => serviceProvider.init({ skipSw: false }));
 
     return {
       handleLogin,
