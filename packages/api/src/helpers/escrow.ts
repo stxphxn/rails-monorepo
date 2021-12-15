@@ -1,4 +1,4 @@
-import { RailsEscrow__factory } from '@rails/contracts/typechain';
+import { RailsEscrow__factory } from '@rails/contracts/src/types';
 import { utils, ethers } from 'ethers'
 
 const provider = ethers.getDefaultProvider('rinkeby');

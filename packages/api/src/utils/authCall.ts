@@ -7,7 +7,7 @@ type AuthRequest = {
     'Content-Type': string,
     'consent'?: string,
   },
-  body: string,
+  body?: string,
 }
 
 const authCall = async (url: string, data = {}, method = 'GET', consentToken?: string): Promise<any> => {
@@ -17,13 +17,16 @@ const authCall = async (url: string, data = {}, method = 'GET', consentToken?: s
       'Authorization': `Basic ${authToken}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(data),
   };
+
+  if (method !== 'GET') {
+    request.body = JSON.stringify(data);
+  }
 
   if (consentToken) {
     request.headers['consent'] = consentToken;
   }
-
+  console.log(request);
   return (await fetch(url, request)).json();
 }
 
