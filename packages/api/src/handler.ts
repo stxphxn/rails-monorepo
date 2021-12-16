@@ -7,15 +7,14 @@ import yapily from './handlers/yapily';
 
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
-
-  switch(url.pathname) {
+  switch(url.pathname.split('/')[1]) {
     // case '/institutions':
     //   return institutionsHandler(request);
-    case '/accounts':
+    case 'accounts':
       return getAccounts(request);
-    case '/account-auth':
+    case 'account-auth':
       return accountAuth(request);
-    case '/yapily':
+    case 'yapily':
       return yapily(request);
     // case '/prepare':
     //   return prepare(request);
