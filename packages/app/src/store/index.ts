@@ -3,6 +3,7 @@ import { InjectionKey } from 'vue';
 import { createStore, useStore as baseUseStore, Store } from 'vuex';
 import VuexORM from '@vuex-orm/core';
 import VuexPersistence from 'vuex-persist';
+import User from './models/User';
 
 // import database from './database';
 /*
@@ -35,6 +36,9 @@ export function useStore(): Store<StateInterface> {
   return baseUseStore(key);
 }
 
+export function getUser(): User {
+  return useStore().$repo(User).all()[0];
+}
 export default function () {
   return store;
 }

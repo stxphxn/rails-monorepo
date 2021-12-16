@@ -1,11 +1,11 @@
 <template>
-<div>
-  <div id="nav">
+<!-- <div> -->
+  <!-- <div id="nav">
     <router-link to="/">Home</router-link> |
     <router-link to="/login">Login</router-link>
-  </div>
+  </div> -->
   <router-view/>
-</div>
+<!-- </div> -->
 
 </template>
 <script lang="ts">
@@ -36,6 +36,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  height: 100%;
 }
 
 #nav {

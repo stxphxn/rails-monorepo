@@ -10,13 +10,13 @@ type LOGINS = 'google';
 
 const verifiers = {
   google: {
-    name: "Google",
-    typeOfLogin: "google",
-    clientId: "221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com",
-    verifier: "google-lrc",
+    name: 'Google',
+    typeOfLogin: 'google',
+    clientId: '221898609709-obfn3p63741l5333093430j3qeiinaa8.apps.googleusercontent.com',
+    verifier: 'google-lrc',
     jwtParams: {},
   },
-}
+};
 
 const serviceProvider = new TorusServiceProvider({
   directParams: {
@@ -49,9 +49,9 @@ export const useServiceProvider = async (typeOfLogin: LOGINS) => {
       ],
     },
   });
-}
+};
 
 export const handleLogin = async () => {
   // triggers google login.
- 
+
 };

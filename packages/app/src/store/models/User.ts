@@ -20,4 +20,9 @@ export default class User extends Model {
 
   @Str('')
   consentToken!: string
+
+  get balance(): string {
+    console.log(this);
+    return '£1000.57';
+  }
 }

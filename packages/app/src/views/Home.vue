@@ -1,12 +1,24 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
+  <div class="flex flex-col h-full">
+    <div class="basis-1/3 place-content-center">
+      <Balance />
+    </div>
+
   </div>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import Balance from '@/components/Balance.vue';
 
-export default class Home extends Vue {
-}
+export default {
+  components: {
+    Balance,
+  },
+  name: 'home',
+  setup() {
+    return {
+      Balance,
+    };
+  },
+};
 </script>
