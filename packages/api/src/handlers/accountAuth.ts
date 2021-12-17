@@ -20,7 +20,7 @@ const accountAuth = async (request: Request): Promise<Response> => {
   // call api
   const data = await authCall('https://api.yapily.com/account-auth-requests', reqBody, 'POST');
   const json = JSON.stringify(data);
-
+  console.log(json);
   return new Response(json,
     {
       headers: {

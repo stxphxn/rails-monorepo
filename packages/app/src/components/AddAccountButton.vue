@@ -13,8 +13,10 @@ export default {
   name: 'AddAccountButton',
   setup() {
     const { publicAddress } = getUser();
-
     const addAccount = async () => {
+      // const response = await fetch('http://localhost:8787/accounts');
+      // console.log(await response.json());
+
       await useAddAccount(publicAddress, 'halifax-sandbox', 'https://display-parameters.com/');
     };
 

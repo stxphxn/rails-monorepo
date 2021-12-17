@@ -26,7 +26,6 @@ const authCall = async (url: string, data = {}, method = 'GET', consentToken?: s
   if (consentToken) {
     request.headers['consent'] = consentToken;
   }
-  console.log(request);
   return (await fetch(url, request)).json();
 }
 
