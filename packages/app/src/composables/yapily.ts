@@ -3,7 +3,6 @@ export const useAddAccount = async (
   institution: string,
   callback: string,
 ): Promise<void> => {
-  console.log(process.env);
   const response = await fetch('http://127.0.0.1:8787/yapily/account-auth-requests', {
     method: 'POST',
     headers: {
@@ -16,9 +15,19 @@ export const useAddAccount = async (
       callback,
     }),
   });
-  const { data: authorisationUrl } = await response.json();
-  console.log(authorisationUrl);
-  // window.open(authorisationUrl);
+  const { data: { authorisationUrl } } = await response.json();
+  window.open(authorisationUrl, '_self');
+};
+
+export const useGetAccount = async (consent: string): Promise<any> => {
+  const response = await fetch(`${process.env.VUE_APP_YAPILY_PROXY as string}accounts`, {
+    method: 'GET',
+    headers: {
+      Consent: consent,
+    },
+  });
+  const { data } = await response.json();
+  return data[0];
 };
 
 export default useAddAccount;

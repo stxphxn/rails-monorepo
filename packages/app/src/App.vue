@@ -22,8 +22,6 @@ export default {
     const user = computed(() => store.$repo(User).all());
     if (user.value.length === 0) {
       router.push('/login');
-    } else {
-      router.push('/');
     }
   },
 };
@@ -36,7 +34,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  height: 100%;
+  height: 100vh;
 }
 
 #nav {
