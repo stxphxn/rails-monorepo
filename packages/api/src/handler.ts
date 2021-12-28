@@ -4,8 +4,9 @@ import getAccounts from "./handlers/getAccounts";
 // import { fulfil } from "./handlers/fulfil";
 import accountAuth from "./handlers/accountAuth";
 import yapily from './handlers/yapily';
+import { addAccount } from "./handlers/addAccount";
 
-function cors(url: URL, response: Response) {
+function cors(response: Response) {
   const newResponse = new Response(response.body, response);
   newResponse.headers.append("Access-Control-Allow-Origin", '*');
   newResponse.headers.append("Vary", "Origin");
@@ -19,11 +20,13 @@ export async function handleRequest(request: Request): Promise<Response> {
     // case '/institutions':
     //   return institutionsHandler(request);
     case 'accounts':
-      return cors(url, await getAccounts(request));
+      return cors(await getAccounts(request));
     case 'account-auth':
-      return cors(url, await accountAuth(request));
+      return cors(await accountAuth(request));
     case 'yapily':
-      return cors(url, await yapily(request));
+      return cors(await yapily(request));
+    case 'add-account':
+      return cors(await addAccount(request));
     // case '/prepare':
     //   return prepare(request);
     // case '/fulfil':

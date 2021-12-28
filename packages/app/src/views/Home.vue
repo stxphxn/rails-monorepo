@@ -16,7 +16,7 @@
       </div>
       <TokenList />
     </div>
-
+  <Drawer />
   </div>
 </template>
 
@@ -25,6 +25,7 @@ import Balance from '@/components/Balance.vue';
 import AddAccountButton from '@/components/AddAccountButton.vue';
 import BankItem from '@/components/BankItem.vue';
 import TokenList from '@/components/TokenList.vue';
+import Drawer from '@/components/Drawer.vue';
 
 export default {
   components: {
@@ -32,6 +33,7 @@ export default {
     BankItem,
     AddAccountButton,
     TokenList,
+    Drawer,
   },
   name: 'home',
   setup() {
