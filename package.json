@@ -6,7 +6,10 @@
     "lerna": "^4.0.0"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap --force-local"
+    "bootstrap": "lerna bootstrap --force-local",
+    "deploy:contracts": "lerna run --scope @rails/contracts deploy --npm-client=yarn",
+    "deploy:api": "lerna run --scope @rails/api deploy --npm-client=yarn",
+    "deploy": "deploy:contracts & deploy:api"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",

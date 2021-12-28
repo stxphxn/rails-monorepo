@@ -18,3 +18,6 @@ format = "service-worker"
 # YAPILY_SECRET
 # MNEMONIC
 # INFURA_API_KEY
+
+[miniflare]
+kv_persist = true # Defaults to ./.mf/kv
