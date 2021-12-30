@@ -61,6 +61,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       chainId: chainIds.hardhat,
+      loggingEnabled: true,
     },
     goerli: getChainConfig("goerli"),
     kovan: getChainConfig("kovan"),

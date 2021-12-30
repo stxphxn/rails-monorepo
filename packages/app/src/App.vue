@@ -5,7 +5,9 @@
     <router-link to="/login">Login</router-link>
   </div> -->
     <n-config-provider :theme-overrides="themeOverrides" style="height: 100%;">
+      <Suspense>
       <router-view/>
+      </Suspense>
     </n-config-provider>
 <!-- </div> -->
 

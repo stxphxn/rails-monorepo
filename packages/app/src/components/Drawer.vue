@@ -21,7 +21,7 @@ export default {
     BuyDai,
   },
   setup() {
-    const active = ref(true);
+    const active = ref(false);
     const activate = () => {
       active.value = true;
     };

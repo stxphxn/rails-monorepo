@@ -1,12 +1,15 @@
 <template>
 <div
-  v-for="token in labels"
-  :key="token.name"
-  class="w-full grid grid-cols-12 gap-3 mb-3">
+  class="w-full h-14 bg-gray-100 rounded-3xl grid grid-cols-12 gap-3 my-3">
   <div
-    class="col-span-3 bg-contain bg-no-repeat bg-clip-padding p-2"
-    :style="`background-image: url(${token.icon})`"
+    class="col-span-3"
   >
+      <n-avatar
+      round
+      class="border-2 border-black"
+      :size="56"
+      :src="token.icon"
+    />
   </div>
   <div class="col-span-5 grid grid-rows-2 gap-1">
     <div class="pt-1 font-bold">
@@ -23,16 +26,16 @@
 </div>
 </template>
 <script lang="ts">
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { NAvatar } from 'naive-ui';
 
 export default {
   name: 'TokenList',
+  components: {
+    NAvatar,
+  },
   setup() {
     const mapTokens = [
-      {
-        name: 'Ethereum',
-        symbol: 'ETH',
-        icon: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@d5c68edec1f5eaec59ac77ff2b48144679cebca1/svg/color/eth.svg',
-      },
       {
         name: 'Dai Stablecoin',
         symbol: 'Dai',
@@ -41,7 +44,7 @@ export default {
     ];
 
     return {
-      labels: mapTokens,
+      token: mapTokens[0],
     };
   },
 };

@@ -17,6 +17,8 @@ export const prepare = async (request: Request): Promise<Response> => {
   }
   const body: PrepareSwapRequestBody = await request.json();
   const {swapDetails, signatures, currencyDetails} = body;
+  // get swap details Hash
+  const 
 
   // check buyer signature
 
