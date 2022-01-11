@@ -306,7 +306,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
           SafeERC20.safeTransferFrom(IERC20(assetId), msg.sender, address(this), specifiedAmount);
           // Calculate the *actual* amount that was sent here
           trueAmount = IERC20(assetId).balanceOf(address(this)) - starting;
-                  
+
         return trueAmount;
     }
 
@@ -321,7 +321,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
       bytes calldata signature
     ) internal pure returns (address) {
         // Create the signed payload
-        SignedFulfilData memory payload = SignedFulfilData({
+        SignedFunctionData memory payload = SignedFunctionData({
           functionIdentifier: func,
           swapHash: swapHash
         });

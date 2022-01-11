@@ -23,7 +23,7 @@ interface IRailsEscrow {
     uint256 expiry;
   }
 
-  struct SignedFulfilData {
+  struct SignedFunctionData {
     string functionIdentifier;
     bytes32 swapHash;
   }
