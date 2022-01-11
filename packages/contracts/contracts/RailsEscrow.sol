@@ -2,7 +2,6 @@
 pragma solidity 0.8.0;
 
 import "./interfaces/IRailsEscrow.sol";
-import "./libraries/LibAsset.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -148,7 +147,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         }
 
         // Transfer from contract to specified recipient
-        LibAsset.transferAsset(assetId, payable(msg.sender), amount);
+        SafeERC20.safeTransfer(IERC20(assetId), msg.sender, amount);
 
         // Emit event
         emit LiquidityRemoved(msg.sender, assetId, amount, msg.sender);
@@ -198,7 +197,6 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
             assetId: swapInfo.assetId,
             amount: swapInfo.amount,
             swapId: swapInfo.swapId,
-            currencyHash: swapInfo.currencyHash,
             prepareBlockNumber: block.number,
             expiry: expiry
         });
@@ -230,7 +228,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         swaps[digest] = _hashSwapTransactionData(swapData.amount, swapData.expiry, 0);
 
         // transfer assets to buyer
-        LibAsset.transferAsset(swapData.assetId, payable(swapData.buyer), swapData.amount);
+        SafeERC20.safeTransfer(IERC20(swapData.assetId), swapData.buyer, swapData.amount);
 
         emit SwapFulfiled(digest, swapData, msg.sender);
     }
@@ -275,8 +273,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
             oracle: swapData.oracle,
             assetId: swapData.assetId,
             amount: swapData.amount,
-            swapId: swapData.swapId,
-            currencyHash: swapData.currencyHash
+            swapId: swapData.swapId
         });
         return keccak256(
             abi.encode(info)
@@ -304,16 +301,12 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         uint256 trueAmount = specifiedAmount;
 
         // Validate correct amounts are transferred
-        if (LibAsset.isNativeAsset(assetId)) {
-          require(msg.value == specifiedAmount, "#TA:005");
-        } else {
-          uint256 starting = LibAsset.getOwnBalance(assetId);
+          uint256 starting = IERC20(assetId).balanceOf(address(this));
           require(msg.value == 0, "#TA:006");
-          LibAsset.transferFromERC20(assetId, msg.sender, address(this), specifiedAmount);
+          SafeERC20.safeTransferFrom(IERC20(assetId), msg.sender, address(this), specifiedAmount);
           // Calculate the *actual* amount that was sent here
-          trueAmount = LibAsset.getOwnBalance(assetId) - starting;
-        }
-
+          trueAmount = IERC20(assetId).balanceOf(address(this)) - starting;
+                  
         return trueAmount;
     }
 

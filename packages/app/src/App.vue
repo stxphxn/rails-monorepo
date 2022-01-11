@@ -15,7 +15,6 @@
 <script lang="ts">
 import { useStore } from '@/store';
 import { computed } from 'vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { NConfigProvider, GlobalThemeOverrides } from 'naive-ui';
 import User from './store/models/User';
 import router from './router';

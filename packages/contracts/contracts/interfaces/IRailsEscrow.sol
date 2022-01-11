@@ -10,7 +10,6 @@ interface IRailsEscrow {
     address assetId;
     uint256 amount;
     uint256 swapId;
-    string currencyHash;
   }
 
   struct SwapData {
@@ -20,7 +19,6 @@ interface IRailsEscrow {
     address assetId;
     uint256 amount;
     uint256 swapId;
-    string currencyHash;
     uint256 prepareBlockNumber;
     uint256 expiry;
   }
