@@ -1,7 +1,7 @@
 import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth, getReference } from '../helpers/createPaymentAuth';
 
-import { getSwapHash, createSignature, encodeSwapInfo, getCurrencyHash } from '../helpers/signatures';
+import { getSwapHash, createSignature, encodeSwapInfo } from '../helpers/signatures';
 
 import { 
   PaymentDetails,
@@ -16,31 +16,28 @@ export const prepare = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const {swapDetails, signatures, currencyDetails} = body;
-  // get swap details Hash
-  const 
+  const {swapDetails, signature } = body;
 
   // check buyer signature
+  // hash swap details
+  // check sig 
 
-  // check valid seller and has liquidity  
-
-  const { consentToken, currencyHash } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
+  // get seller consent token   
+  const { consentToken } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
 
   // create swap id
   const swapId = SWAPS_DB.list.length + 1
 
- 
   // create swap hash
-  // const currencyHash = getCurrencyHash(currencyDetails);
   const swapInfo = {
     ...swapDetails,
     swapId,
-    currencyHash,
   }
   const encodedSwapInfo = encodeSwapInfo(swapInfo);
   const swapHash = getSwapHash(encodedSwapInfo);
   
-
+  // fetch exchange rate
+  const exchangeRate = 1;
 
   // fetch seller account details
   const accountDetails = await fetchAccountDetails(consentToken);
@@ -48,8 +45,8 @@ export const prepare = async (request: Request): Promise<Response> => {
   // create payment autorisations
   const paymentDetails: PaymentDetails = {
     amount: {
-      amount: (swapInfo.amount * currencyDetails.exchangeRate),
-      currency: currencyDetails.currency,
+      amount: (swapInfo.amount * exchangeRate),
+      currency: 'GBP',
     },
     applicationUserId: swapInfo.buyer,
     institutionId: body.buyerInstititution,
@@ -62,14 +59,13 @@ export const prepare = async (request: Request): Promise<Response> => {
   const paymentAuth = await createPaymentAuth(paymentDetails);
   
   // create oracle signature 
-  const signature = await createSignature('prepare', swapHash);
+  const prepareSignature = await createSignature('prepare', swapHash);
 
   // Add swap tothe db
   const swap = {
     paymentDetails,
     swapInfo,
-    currencyDetails,
-    signature,
+    prepareSignature,
     reference: getReference(swapHash),
     status: 'PREPARE',
   }
@@ -78,7 +74,7 @@ export const prepare = async (request: Request): Promise<Response> => {
   
   // response
   const response: PrepareSwapResponse = {
-    signature,
+    prepareSignature,
     paymentAuth,
     encodedSwapInfo,
     swapInfo,

@@ -1,9 +1,6 @@
-// import institutionsHandler from "./handlers/getInstitutions";
-import getAccounts from "./handlers/getAccounts";
-// import { prepare } from "./handlers/prepare";
-// import { fulfil } from "./handlers/fulfil";
-import accountAuth from "./handlers/accountAuth";
-import yapily from './handlers/yapily';
+import { prepare } from "./handlers/prepare";
+import { fulfil } from "./handlers/fulfil";
+import { ob } from './handlers/ob';
 import { addAccount } from "./handlers/addAccount";
 
 function cors(response: Response) {
@@ -17,23 +14,15 @@ function cors(response: Response) {
 export async function handleRequest(request: Request): Promise<Response> {
   const url = new URL(request.url);
   switch(url.pathname.split('/')[1]) {
-    // case '/institutions':
-    //   return institutionsHandler(request);
-    case 'accounts':
-      return cors(await getAccounts(request));
-    case 'account-auth':
-      return cors(await accountAuth(request));
-    case 'yapily':
-      return cors(await yapily(request));
+    case 'ob':
+      return cors(await ob(request));
     case 'add-account':
       return cors(await addAccount(request));
-    // case '/prepare':
-    //   return prepare(request);
-    // case '/fulfil':
-    //   return fulfil(request)
-    // case '/cancel':
-    //   console.log('cancel swap');
-    //   break;
+    case '/prepare':
+      return cors(await prepare(request));
+    case '/fulfil':
+      return cors(await fulfil(request));
+
     default:
       break;
   }

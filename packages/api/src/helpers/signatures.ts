@@ -18,7 +18,6 @@ export const SwapInfoEncoding = tidy(`tuple(
   address assetId,
   uint256 amount,
   uint256 swapId,
-  string currencyHash,
 )`)
 
 
@@ -42,7 +41,7 @@ export const getSwapData = async (receipt: ContractReceipt, eventName: string): 
 };
 
 export const encodeSwapInfo = (swapInfo: SwapInfo | SwapData): string => {
-  const {buyer, seller, oracle, assetId, amount, swapId, currencyHash} = swapInfo
+  const {buyer, seller, oracle, assetId, amount, swapId } = swapInfo
   return defaultAbiCoder.encode(
     [SwapInfoEncoding],
     [{
@@ -51,8 +50,7 @@ export const encodeSwapInfo = (swapInfo: SwapInfo | SwapData): string => {
       oracle, 
       assetId, 
       amount, 
-      swapId, 
-      currencyHash,
+      swapId,
     }],
   )
 };

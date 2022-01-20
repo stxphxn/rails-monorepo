@@ -37,7 +37,7 @@ function changeUrl(u: string) {
 }
 
 // used for testing
-const yapily = async (request: Request): Promise<Response> => {
+export const ob = async (request: Request): Promise<Response> => {
   const url = changeUrl(request.url)
   try {
     const response = await fetch(url, createRequest(request));
@@ -49,4 +49,4 @@ const yapily = async (request: Request): Promise<Response> => {
 
 }
 
-export default yapily;
+export default ob;

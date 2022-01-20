@@ -131,7 +131,6 @@ export type SwapDetails = {
 
 export type SwapInfo =  SwapDetails & {
   swapId: number,
-  currencyHash: string,
 }
 
 export type SwapData = SwapInfo & {
@@ -144,21 +143,16 @@ export type CurrencyDetails = {
   currency: string,
 }
 
-export type Signature = {
-  address: string,
-  sig: string,
-}
-
 export type PrepareSwapRequestBody = {
   swapDetails: SwapDetails,
   currencyDetails: CurrencyDetails,
   sellerInstitution: string,
   buyerInstititution: string,
-  signatures: Signature[],
+  signature: string,
 }
 
 export type PrepareSwapResponse = {
-  signature: string,
+  prepareSignature: string,
   paymentAuth: PaymentAuthResponse,
   encodedSwapInfo: string,
   swapInfo: SwapInfo,

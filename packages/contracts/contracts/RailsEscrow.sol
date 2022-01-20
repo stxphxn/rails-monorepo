@@ -123,7 +123,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         // Update the seller balances.
         sellerBalances[msg.sender][assetId] += amount;
 
-        emit LiquidityAdded(msg.sender, assetId, amount, msg.sender);
+        emit LiquidityAdded(msg.sender, assetId, amount);
     }
 
     /**
@@ -150,7 +150,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         SafeERC20.safeTransfer(IERC20(assetId), msg.sender, amount);
 
         // Emit event
-        emit LiquidityRemoved(msg.sender, assetId, amount, msg.sender);
+        emit LiquidityRemoved(msg.sender, assetId, amount);
     }
 
     function prepare(
@@ -259,11 +259,6 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
         sellerBalances[swapData.seller][swapData.assetId] += swapData.amount;
 
         emit SwapCancelled(digest, swapData, msg.sender);
-    }
-
-    function getSwapStatus(SwapInfo calldata swapInfo) external view override returns (bytes32 status) {
-        bytes32 digest = keccak256(abi.encode(swapInfo));
-        return swaps[digest];
     }
 
     function getSwapHash(SwapData calldata swapData) public pure override returns (bytes32) {

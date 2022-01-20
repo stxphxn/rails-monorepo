@@ -17,11 +17,6 @@ export const fulfil = async (request: Request): Promise<Response> => {
   const body: FulfilSwapRequestBody = await request.json();
   const { swapHash } = body;
 
-  // // TODO: check for valid swap
-  // const encodedSwapData = encodeSwapInfo(swapData, swapData.swapId, swapData.currencyHash);
-  // const swapHash = getSwapHash(encodedSwapData);
-  // if (!(await SWAPS_DB.get(swapHash))) throw Error('No swap found');
-
   const swap = JSON.parse(await SWAPS_DB.get(swapHash));
   if (!swap) throw Error('Swap not found');
   if (swap.status !== 'PREPARE') throw Error('Swap already fulfiled');
@@ -36,6 +31,8 @@ export const fulfil = async (request: Request): Promise<Response> => {
   
   // TODO: create release signature
   const signature = await createSignature('fulfil', swapHash);
+
+  
 
   const response = {
     swapData: swap.swapData,

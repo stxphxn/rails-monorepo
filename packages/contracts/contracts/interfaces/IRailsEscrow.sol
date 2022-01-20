@@ -45,9 +45,9 @@ interface IRailsEscrow {
   event AssetRemoved(address indexed removedAssetId, address indexed caller);
 
   // Liquidity events
-  event LiquidityAdded(address indexed seller, address indexed assetId, uint256 amount, address caller);
+  event LiquidityAdded(address indexed seller, address indexed assetId, uint256 amount);
 
-  event LiquidityRemoved(address indexed seller, address indexed assetId, uint256 amount, address recipient);
+  event LiquidityRemoved(address indexed seller, address indexed assetId, uint256 amount);
 
   // Swap events
   event SwapPrepared(bytes32 swapHash, SwapData swapData, address caller);
@@ -74,8 +74,6 @@ interface IRailsEscrow {
   function fulfil(SwapData calldata swapData, bytes calldata fulfilSignature) external;
 
   function cancel(SwapData calldata swapData, bytes calldata cancelSignature) external;
-
-  function getSwapStatus(SwapInfo calldata swapInfo) external view returns (bytes32 status);
 
   function getSwapHash(SwapData calldata swapData) external pure returns (bytes32);
 }
