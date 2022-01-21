@@ -1,5 +1,5 @@
 import { checkTransaction } from "../helpers/checkTransaction";
-import { createSignature, encodeSwapInfo, getSwapHash } from "../helpers/signatures";
+import { createSignature } from "../helpers/signatures";
 import { SwapData } from "../types";
 
 export type FulfilSwapRequestBody = {
