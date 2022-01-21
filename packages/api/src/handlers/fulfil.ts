@@ -16,33 +16,31 @@ export const fulfil = async (request: Request): Promise<Response> => {
   }
   const body: FulfilSwapRequestBody = await request.json();
   const { swapHash } = body;
-
-  const swap = JSON.parse(await SWAPS_DB.get(swapHash));
-  if (!swap) throw Error('Swap not found');
-  if (swap.status !== 'PREPARE') throw Error('Swap already fulfiled');
-  // TODO: fetch seller consent token
-  const { consentToken, id } = JSON.parse(await SELLERS_DB.get(swap.swapData.seller));
-  
-  // TODO: check for payment transaction
-  const received = await checkTransaction(consentToken, id,  swapHash, swap.swapData.amount);
-  if (!received) {
-    throw new Error('Payment not found');
-  }
-  
-  // TODO: create release signature
-  const signature = await createSignature('fulfil', swapHash);
-
-  
-
-  const response = {
-    swapData: swap.swapData,
-    signature,
-  }
-
-  return new Response(JSON.stringify(response),
-  {
-    headers: {
-      "content-type": 'application/json'
+  try {
+    const swap = JSON.parse(await SWAPS_DB.get(swapHash));
+    if (!swap) throw Error('Swap not found');
+    if (swap.status !== 'PREPARE') throw Error('Swap already fulfiled or cancelled');
+    // fetch seller consent token
+    const { consentToken, institutionId } = JSON.parse(await SELLERS_DB.get(swap.swapData.seller));
+    // check for payment transaction
+    const received = await checkTransaction(consentToken, institutionId,  swapHash, swap.swapData.amount);
+    if (!received) {
+      throw new Error('Payment not found');
     }
-  });
+    // create release signature
+    const signature = await createSignature('fulfil', swapHash);
+    // response object  
+    const response = {
+      swapData: swap.swapData,
+      signature,
+    }
+    return new Response(JSON.stringify(response),
+    {
+      headers: {
+        "content-type": 'application/json'
+      }
+    });
+  } catch(e: any) {
+    return new Response(e.message)
+  }
 };

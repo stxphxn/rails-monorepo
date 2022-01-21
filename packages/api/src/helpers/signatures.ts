@@ -86,8 +86,9 @@ export const getCurrencyHash = (currencyDetails: CurrencyDetails): string => {
   )]);
 };
 
-export const getSwapHash = (encodedSwapInfo: string): string => {
-  return solidityKeccak256(['bytes'],[encodedSwapInfo]);
+export const getSwapHash = (swapInfo: SwapInfo): string => {
+  const encoded = encodeSwapInfo(swapInfo);
+  return solidityKeccak256(['bytes'],[encoded]);
 }
 
 export const createSignature = async (type: string, swapHash: string): Promise<string> => {

@@ -1,5 +1,5 @@
 import authCall from "../utils/authCall";
-import { PaymentDetails, PaymentRequest, PaymentAuthResponse } from "../types";
+import { PaymentRequest, PaymentAuthResponse, SwapInfo } from "../types";
 
 
 
@@ -8,25 +8,26 @@ export const getReference = (hash: string): string => {
 }
 
 export const createPaymentAuth = async (
-  paymentDetails: PaymentDetails,
+  swapInfo: SwapInfo,
+  swapHash: string,
+  accountInfo: any,
+  institutionId: string,
+  callback: string,
 ): Promise<PaymentAuthResponse> => {
-
-  const {
-    amount,
-    applicationUserId,
-    institutionId,
-    payeeInfo: { accountIdentifications, name },
-    swapHash,
-  } = paymentDetails;
+  // fetch exchange rate
+  const exchangeRate = 0.75;
   
   const paymentRequest: PaymentRequest = {
-    amount,
+    amount: {
+      amount: (swapInfo.amount * exchangeRate),
+      currency: 'GBP',
+    },
     payee: {
-      accountIdentifications,
+      accountIdentifications: accountInfo.accountIdentifications,
       address: {
         country: 'GB',
       },
-      name,
+      name: accountInfo.name,
     },
     paymentIdempotencyId: swapHash,
     reference: getReference(swapHash),
@@ -34,15 +35,15 @@ export const createPaymentAuth = async (
   }
 
   const reqBody = {
-    applicationUserId,
+    applicationUserId: swapInfo.buyer,
     institutionId,
-    callback: 'https://display-parameters.com/',
+    callback,
     paymentRequest,
   };
   
   const paymentAuth =  await authCall('https://api.yapily.com/payment-auth-requests', reqBody, 'POST');
   return {
-    paymentRequest,
+    paymentRequest: reqBody,
     authorisationUrl: paymentAuth.data.authorisationUrl,
     id: paymentAuth.data.id,
     userUuid: paymentAuth.data.userUuid,

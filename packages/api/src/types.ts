@@ -115,7 +115,7 @@ export type PaymentDetails = {
 }
 
 export type PaymentAuthResponse = {
-  paymentRequest: PaymentRequest,
+  paymentRequest: any,
   authorisationUrl: string,
   id: string,
   userUuid: string,
@@ -146,9 +146,9 @@ export type CurrencyDetails = {
 export type PrepareSwapRequestBody = {
   swapDetails: SwapDetails,
   currencyDetails: CurrencyDetails,
-  sellerInstitution: string,
-  buyerInstititution: string,
+  institutionId: string,
   signature: string,
+  callback: string,
 }
 
 export type PrepareSwapResponse = {

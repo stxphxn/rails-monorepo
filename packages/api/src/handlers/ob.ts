@@ -10,6 +10,7 @@ type YapilyRequest = {
   },
   body?: ReadableStream<Uint8Array> | null,
 }
+const ALLOWED_CALLS = ['']
 
 function createRequest(r: Request) {
   const request: YapilyRequest = {
@@ -36,17 +37,17 @@ function changeUrl(u: string) {
   return url.toString();
 }
 
-// used for testing
 export const ob = async (request: Request): Promise<Response> => {
-  const url = changeUrl(request.url)
   try {
+    // checks if request is allowed and
+    // changes request URL to OB API
+    const url = changeUrl(request.url)
+    // Create a new Request containing Auth Token
     const response = await fetch(url, createRequest(request));
     return response
   } catch(e: any) {
-    console.log(e);
     return new Response(e.message)
   }
-
 }
 
 export default ob;

@@ -1,13 +1,11 @@
-import { fetchAccountDetails } from '../helpers/fetchAccountDetails';
 import { createPaymentAuth, getReference } from '../helpers/createPaymentAuth';
-
 import { getSwapHash, createSignature, encodeSwapInfo } from '../helpers/signatures';
+import { verifySignature } from '../utils/verifySignature';
 
-import { 
-  PaymentDetails,
+import {
   PrepareSwapRequestBody,
   PrepareSwapResponse,
- } from '../types';
+} from '../types';
 
 export const prepare = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -16,74 +14,58 @@ export const prepare = async (request: Request): Promise<Response> => {
     });
   }
   const body: PrepareSwapRequestBody = await request.json();
-  const {swapDetails, signature } = body;
-
-  // check buyer signature
-  // hash swap details
-  // check sig 
-
-  // get seller consent token   
-  const { consentToken } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
-
-  // create swap id
-  const swapId = SWAPS_DB.list.length + 1
-
-  // create swap hash
-  const swapInfo = {
-    ...swapDetails,
-    swapId,
+  const { swapDetails, signature, institutionId, callback } = body;
+  try {
+    // Check signature was signed by swapDetails.buyer
+    const verified = await verifySignature(swapDetails.buyer, JSON.stringify(swapDetails), signature)
+    if (!verified) {
+      throw new Error('Buyer signature is not valid');
+    }
+    // get seller account information 
+    const { accountInfo } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
+    // create swap id
+    const swapId = SWAPS_DB.list.length + 1
+    // create swap hash
+    const swapInfo = {
+      ...swapDetails,
+      swapId,
+    }
+    // Create swap hash
+    const swapHash = getSwapHash(swapInfo);
+    // Create a Pament Initiation Request
+    const paymentAuth = await createPaymentAuth(
+      swapInfo,
+      swapHash,
+      accountInfo,
+      institutionId,
+      callback,
+      );
+    // create oracle signature 
+    const prepareSignature = await createSignature('prepare', swapHash);
+    // Add swap to the db
+    const swap = {
+      paymentDetails: paymentAuth.paymentRequest,
+      swapInfo,
+      prepareSignature,
+      reference: getReference(swapHash),
+      status: 'PREPARE',
+    }
+    await SWAPS_DB.put(swapHash, JSON.stringify(swap));
+    // response
+    const response: PrepareSwapResponse = {
+      prepareSignature,
+      paymentAuth,
+      encodedSwapInfo: encodeSwapInfo(swapInfo),
+      swapInfo,
+    }
+    return new Response(JSON.stringify(response),
+      {
+        headers: {
+          "content-type": 'application/json'
+        }
+      });
+  } catch (e: any) {
+    return new Response(e.message)
   }
-  const encodedSwapInfo = encodeSwapInfo(swapInfo);
-  const swapHash = getSwapHash(encodedSwapInfo);
-  
-  // fetch exchange rate
-  const exchangeRate = 1;
 
-  // fetch seller account details
-  const accountDetails = await fetchAccountDetails(consentToken);
-
-  // create payment autorisations
-  const paymentDetails: PaymentDetails = {
-    amount: {
-      amount: (swapInfo.amount * exchangeRate),
-      currency: 'GBP',
-    },
-    applicationUserId: swapInfo.buyer,
-    institutionId: body.buyerInstititution,
-    payeeInfo: {
-      accountIdentifications: accountDetails.accountIdentifications,
-      name: accountDetails.name,
-    },
-    swapHash,
-  }
-  const paymentAuth = await createPaymentAuth(paymentDetails);
-  
-  // create oracle signature 
-  const prepareSignature = await createSignature('prepare', swapHash);
-
-  // Add swap tothe db
-  const swap = {
-    paymentDetails,
-    swapInfo,
-    prepareSignature,
-    reference: getReference(swapHash),
-    status: 'PREPARE',
-  }
-
-  await SWAPS_DB.put(swapHash, JSON.stringify(swap));
-  
-  // response
-  const response: PrepareSwapResponse = {
-    prepareSignature,
-    paymentAuth,
-    encodedSwapInfo,
-    swapInfo,
-  }
-  
-  return new Response(JSON.stringify(response),
-    {
-      headers: {
-        "content-type": 'application/json'
-      }
-    });
 };
