@@ -17,8 +17,10 @@ export const addAccount = async(request: Request): Promise<Response> => {
   const body: AddAccountReqBody = await request.json();
   try {
     // check consent token returns an account
-    const accountInfo = await authCall('https://api.yapily.com/accounts', undefined, 'GET', body.consent)
-    .catch((e) => {throw e})
+    const response = await authCall('https://api.yapily.com/accounts', undefined, 'GET', body.consent)
+    .catch((e) => {throw e});
+
+    const accountInfo = response.data[0];
     // Call escrow contract to add seller
     const tx = await escrow.addSeller(body.account);
     // store in db

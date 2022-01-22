@@ -10,7 +10,7 @@ kv_namespaces = [
 ]
 
 [build]
-command = "npm run build"
+command = "yarn run build"
 [build.upload]
 format = "service-worker"
 # [secrets]

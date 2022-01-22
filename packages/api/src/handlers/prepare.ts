@@ -17,10 +17,10 @@ export const prepare = async (request: Request): Promise<Response> => {
   const { swapDetails, signature, institutionId, callback } = body;
   try {
     // Check signature was signed by swapDetails.buyer
-    const verified = await verifySignature(swapDetails.buyer, JSON.stringify(swapDetails), signature)
-    if (!verified) {
-      throw new Error('Buyer signature is not valid');
-    }
+    // const verified = await verifySignature(swapDetails.buyer, JSON.stringify(swapDetails), signature)
+    // if (!verified) {
+    //   throw new Error('Buyer signature is not valid');
+    // }
     // get seller account information 
     const { accountInfo } = JSON.parse(await SELLERS_DB.get(swapDetails.seller));
     // create swap id
