@@ -27,7 +27,7 @@ export const createPaymentAuth = async (
       address: {
         country: 'GB',
       },
-      name: accountInfo.name,
+      name: accountInfo.accountNames[0].name,
     },
     paymentIdempotencyId: swapHash,
     reference: getReference(swapHash),
