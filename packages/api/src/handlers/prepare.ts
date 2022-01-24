@@ -1,11 +1,12 @@
 import { createPaymentAuth, getReference } from '../helpers/createPaymentAuth';
-import { getSwapHash, createSignature, encodeSwapInfo } from '../helpers/signatures';
+import { getSwapHash, createSignature, encodeSwapInfo, getSwapData } from '../helpers/signatures';
 import { verifySignature } from '../utils/verifySignature';
 
 import {
   PrepareSwapRequestBody,
   PrepareSwapResponse,
 } from '../types';
+import { escrow } from '../helpers/escrow';
 
 export const prepare = async (request: Request): Promise<Response> => {
   if (request.method !== "POST") {
@@ -42,21 +43,30 @@ export const prepare = async (request: Request): Promise<Response> => {
       );
     // create oracle signature 
     const prepareSignature = await createSignature('prepare', swapHash);
+
+    // Send prepare transaction
+    const prepareTx = await escrow.prepare(swapInfo, prepareSignature);
+    const receipt = await prepareTx.wait();
+    const swapEvent = getSwapData(receipt, 'SwapPrepared');
+
     // Add swap to the db
     const swap = {
       paymentDetails: paymentAuth.paymentRequest,
       swapInfo,
+      swapData: swapEvent.swapData,
       prepareSignature,
       reference: getReference(swapHash),
       status: 'PREPARE',
     }
     await SWAPS_DB.put(swapHash, JSON.stringify(swap));
     // response
-    const response: PrepareSwapResponse = {
+    const response = {
+      swapHash,
       prepareSignature,
+      receipt,
       paymentAuth,
-      encodedSwapInfo: encodeSwapInfo(swapInfo),
       swapInfo,
+      swapEvent,
     }
     return new Response(JSON.stringify(response),
       {

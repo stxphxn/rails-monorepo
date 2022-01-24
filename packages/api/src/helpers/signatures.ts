@@ -21,7 +21,7 @@ export const SwapInfoEncoding = tidy(`tuple(
 )`)
 
 
-export const getSwapData = async (receipt: ContractReceipt, eventName: string): Promise<any> => {
+export const getSwapData = (receipt: ContractReceipt, eventName: string): any => {
   const idx = receipt.events?.findIndex((e) => e.event === eventName) ?? -1;
   const decoded = receipt.events![idx].decode!(receipt.events![idx].data, receipt.events![idx].topics);
   return {
@@ -36,8 +36,8 @@ export const getSwapData = async (receipt: ContractReceipt, eventName: string): 
       currencyHash: decoded[1][6],
       prepareBlockNumber: decoded[1][7],
       expiry: decoded[1][8],
-   }
-}
+    }
+  }
 };
 
 export const encodeSwapInfo = (swapInfo: SwapInfo | SwapData): string => {

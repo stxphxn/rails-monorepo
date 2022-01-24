@@ -18,6 +18,9 @@ export const createPaymentAuth = async (
   const exchangeRate = 0.75;
   
   const paymentRequest: PaymentRequest = {
+    type: 'DOMESTIC_INSTANT_PAYMENT',
+    reference: getReference(swapHash),
+    paymentIdempotencyId: swapHash,
     amount: {
       amount: (swapInfo.amount * exchangeRate),
       currency: 'GBP',
@@ -29,9 +32,6 @@ export const createPaymentAuth = async (
       },
       name: accountInfo.accountNames[0].name,
     },
-    paymentIdempotencyId: swapHash,
-    reference: getReference(swapHash),
-    type: 'DOMESTIC_INSTANT_PAYMENT',
   }
 
   const reqBody = {

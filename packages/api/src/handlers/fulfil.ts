@@ -1,4 +1,5 @@
 import { checkTransaction } from "../helpers/checkTransaction";
+import { escrow } from "../helpers/escrow";
 import { createSignature } from "../helpers/signatures";
 import { SwapData } from "../types";
 
@@ -29,9 +30,14 @@ export const fulfil = async (request: Request): Promise<Response> => {
     }
     // create release signature
     const signature = await createSignature('fulfil', swapHash);
+
+    // send tx
+    const fulfilTx = await escrow.fulfil(swap.swapData, signature);
+    const receipt = await fulfilTx.wait();
     // response object  
     const response = {
       swapData: swap.swapData,
+      receipt,
       signature,
     }
     return new Response(JSON.stringify(response),

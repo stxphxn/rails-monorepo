@@ -145,7 +145,6 @@ export type CurrencyDetails = {
 
 export type PrepareSwapRequestBody = {
   swapDetails: SwapDetails,
-  currencyDetails: CurrencyDetails,
   institutionId: string,
   signature: string,
   callback: string,
