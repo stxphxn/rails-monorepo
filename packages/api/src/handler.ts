@@ -18,9 +18,9 @@ export async function handleRequest(request: Request): Promise<Response> {
       return cors(await ob(request));
     case 'add-account':
       return cors(await addAccount(request));
-    case '/prepare':
+    case 'prepare':
       return cors(await prepare(request));
-    case '/fulfil':
+    case 'fulfil':
       return cors(await fulfil(request));
 
     default:

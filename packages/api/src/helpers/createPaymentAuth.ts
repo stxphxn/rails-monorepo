@@ -1,5 +1,6 @@
 import authCall from "../utils/authCall";
-import { PaymentRequest, PaymentAuthResponse, SwapInfo } from "../types";
+import { PaymentRequest, PaymentAuthResponse, SwapInfo, SwapDetails } from "../types";
+import { Console } from "console";
 
 
 
@@ -7,8 +8,12 @@ export const getReference = (hash: string): string => {
   return hash.substring(0, 10);
 }
 
+export const getPaymentId = (hash: string): string => {
+  return hash.substring(0, 34);
+}
+
 export const createPaymentAuth = async (
-  swapInfo: SwapInfo,
+  swapInfo: SwapDetails,
   swapHash: string,
   accountInfo: any,
   institutionId: string,
@@ -16,13 +21,13 @@ export const createPaymentAuth = async (
 ): Promise<PaymentAuthResponse> => {
   // fetch exchange rate
   const exchangeRate = 0.75;
-  
+  console.log(swapInfo.amount);
   const paymentRequest: PaymentRequest = {
-    type: 'DOMESTIC_INSTANT_PAYMENT',
+    type: 'DOMESTIC_PAYMENT',
     reference: getReference(swapHash),
-    paymentIdempotencyId: swapHash,
+    paymentIdempotencyId: getPaymentId(swapHash),
     amount: {
-      amount: (swapInfo.amount * exchangeRate),
+      amount: (swapInfo.amount as number * exchangeRate),
       currency: 'GBP',
     },
     payee: {
@@ -42,8 +47,9 @@ export const createPaymentAuth = async (
   };
   
   const paymentAuth =  await authCall('https://api.yapily.com/payment-auth-requests', reqBody, 'POST');
+  console.log(paymentAuth);
   return {
-    paymentRequest: reqBody,
+    paymentRequest,
     authorisationUrl: paymentAuth.data.authorisationUrl,
     id: paymentAuth.data.id,
     userUuid: paymentAuth.data.userUuid,

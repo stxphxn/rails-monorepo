@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+
 interface Amount {
   amount: number,
   currency: string,
@@ -126,7 +128,7 @@ export type SwapDetails = {
   seller: string,
   oracle: string,
   assetId: string,
-  amount: number,
+  amount: number | BigNumber,
 }
 
 export type SwapInfo =  SwapDetails & {

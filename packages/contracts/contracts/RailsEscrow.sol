@@ -33,7 +33,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
      * @dev Mapping from swap details hash to its end time (as a unix timestamp).
      * After the end time the swap can be cancelled, and the funds will be returned to the pool.
      */
-    mapping (bytes32 => bytes32) internal swaps;
+    mapping (bytes32 => bytes32) public swaps;
 
     /**
       * @notice Used to add sellers that can add liqudity
@@ -175,7 +175,7 @@ contract RailsEscrow is ReentrancyGuard, Ownable, IRailsEscrow {
 
         // check swap doesn't already exist
         bytes32 digest = keccak256(abi.encode(swapInfo));
-        require(swaps[digest] == 0, "#P:007");
+        require(swaps[digest] == bytes32(0), "#P:007");
 
         // Validate signature
         require(msg.sender == owner() || _recoverFuncSignature(digest, "prepare", prepareSignature) == owner(), "#F:02");

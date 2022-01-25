@@ -23,6 +23,7 @@ export const addAccount = async(request: Request): Promise<Response> => {
     const accountInfo = response.data[0];
     // Call escrow contract to add seller
     const tx = await escrow.addSeller(body.account);
+    console.log(await tx.wait());
     // store in db
     await SELLERS_DB.put(body.account, JSON.stringify({
       institutionId: body.institutionId,

@@ -32,7 +32,9 @@ function createRequest(r: Request) {
 function changeUrl(u: string) {
   const url = new URL(u);
   const path = url.pathname.split('/')[2];
-  url.hostname = 'api.yapily.com'
+  url.protocol = 'https';
+  url.hostname = 'api.yapily.com';
+  url.port = '';
   url.pathname = `/${path}`;
   return url.toString();
 }
@@ -41,9 +43,11 @@ export const ob = async (request: Request): Promise<Response> => {
   try {
     // checks if request is allowed and
     // changes request URL to OB API
-    const url = changeUrl(request.url)
+    const url = changeUrl(request.url);
+    console.log(url);
     // Create a new Request containing Auth Token
     const response = await fetch(url, createRequest(request));
+    
     return response
   } catch(e: any) {
     return new Response(e.message)

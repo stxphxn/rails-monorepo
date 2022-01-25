@@ -1,5 +1,5 @@
 import { BigNumber, ContractReceipt } from 'ethers';
-import { defaultAbiCoder, solidityKeccak256, arrayify, splitSignature, Bytes } from 'ethers/lib/utils';
+import { defaultAbiCoder, solidityKeccak256, arrayify, splitSignature, Bytes, Interface } from 'ethers/lib/utils';
 
 import { wallet } from "../helpers/getWallet";
 import { SwapInfo, CurrencyDetails, SwapData } from '../types';
@@ -21,22 +21,25 @@ export const SwapInfoEncoding = tidy(`tuple(
 )`)
 
 
-export const getSwapData = (receipt: ContractReceipt, eventName: string): any => {
-  const idx = receipt.events?.findIndex((e) => e.event === eventName) ?? -1;
-  const decoded = receipt.events![idx].decode!(receipt.events![idx].data, receipt.events![idx].topics);
+export const getSwapData = (receipt: ContractReceipt): any => {
+  const abi = [ 'event SwapPrepared(bytes32 swapHash,(address,address,address,address,uint256,uint256,uint256,uint256) swapData, address caller)'];
+  const iface = new Interface(abi);
+  const log = iface.parseLog(receipt.logs[0]);
+  console.log(log);
+  const {swapHash, swapData } = log.args;
+  
   return {
-    swapHash: decoded[0],
+    swapHash,
     swapData: {
-      buyer: decoded[1][0],
-      seller: decoded[1][1],
-      oracle: decoded[1][2],
-      assetId: decoded[1][3],
-      amount: decoded[1][4],
-      swapId: decoded[1][5],
-      currencyHash: decoded[1][6],
-      prepareBlockNumber: decoded[1][7],
-      expiry: decoded[1][8],
-    }
+      buyer: swapData[0],
+      seller: swapData[1],
+      oracle: swapData[2],
+      assetId: swapData[3],
+      amount:  parseInt(swapData[4].hex, 10),
+      swapId:  parseInt(swapData[5].hex, 10),
+      prepareBlockNumber: parseInt(swapData[6].hex, 10),
+      expiry:  parseInt(swapData[7].hex, 10),
+    },
   }
 };
 
