@@ -21,17 +21,24 @@ export const addAccount = async(request: Request): Promise<Response> => {
     .catch((e) => {throw e});
 
     const accountInfo = response.data[0];
+    
     // Call escrow contract to add seller
     const tx = await escrow.addSeller(body.account);
-    console.log(await tx.wait());
+    const receipt = await tx.wait();
+    
     // store in db
     await SELLERS_DB.put(body.account, JSON.stringify({
       institutionId: body.institutionId,
       consent: body.consent,
       accountInfo,
     }))
+
+    const res = {
+      message: `Seller ${body.account} Added`,
+      transactionHash: receipt.transactionHash,
+    }
     // return transaction details
-    return new Response(JSON.stringify(tx),
+    return new Response(JSON.stringify(res),
     {
       headers: {
         "content-type": 'application/json'
