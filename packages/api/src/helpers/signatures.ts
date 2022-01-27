@@ -25,7 +25,6 @@ export const getSwapData = (receipt: ContractReceipt): any => {
   const abi = [ 'event SwapPrepared(bytes32 swapHash,(address,address,address,address,uint256,uint256,uint256,uint256) swapData, address caller)'];
   const iface = new Interface(abi);
   const log = iface.parseLog(receipt.logs[0]);
-  console.log(log);
   const {swapHash, swapData } = log.args;
   
   return {
@@ -35,10 +34,10 @@ export const getSwapData = (receipt: ContractReceipt): any => {
       seller: swapData[1],
       oracle: swapData[2],
       assetId: swapData[3],
-      amount:  parseInt(swapData[4].hex, 10),
-      swapId:  parseInt(swapData[5].hex, 10),
-      prepareBlockNumber: parseInt(swapData[6].hex, 10),
-      expiry:  parseInt(swapData[7].hex, 10),
+      amount:  swapData[4],
+      swapId:  swapData[5],
+      prepareBlockNumber: swapData[6],
+      expiry:  swapData[7],
     },
   }
 };

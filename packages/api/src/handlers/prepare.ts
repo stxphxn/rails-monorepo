@@ -24,8 +24,12 @@ export const prepare = async (request: Request): Promise<Response> => {
     // }
     // get seller account information 
     const { accountInfo } = JSON.parse(await SELLERS_DB.get(body.swapDetails.seller));
+    console.log(`FETCHED ACCOUNT INFO FOR ${body.swapDetails.seller} FROM SELLERS_DB`)
+
     // create swap id
-    const swapId = SWAPS_DB.list.length + 1
+    const swapId = (await SWAPS_DB.list()).keys.length + 1;
+    console.log(`SWAP_ID: ${swapId}`);
+
     // create swap hash
     const swapInfo = {
       ...body.swapDetails,
@@ -44,6 +48,8 @@ export const prepare = async (request: Request): Promise<Response> => {
 
 
     const swapHash = await escrow.getSwapHash(swapData);
+    console.log(`SWAP HASH: ${swapId}`);
+
     // const swapHash = getSwapHash(swapInfo);
 
     // Create a Pament Initiation Request
@@ -54,9 +60,12 @@ export const prepare = async (request: Request): Promise<Response> => {
       body.institutionId,
       body.callback,
       );
+      console.log(`GENERATED PAYMENT INITIATION REQUEST FOR ${body.institutionId}`);
+
     // create oracle signature 
     const prepareSignature = await createSignature('prepare', swapHash);
-    
+    console.log(`CALLED PREPARE ON ESCROW CONTRACT`);
+
     // Send prepare transaction
     const prepareTx = await escrow.prepare(swapInfoStruct, prepareSignature);
     const receipt = await prepareTx.wait();
@@ -76,6 +85,7 @@ export const prepare = async (request: Request): Promise<Response> => {
     }
     const swapJson = JSON.stringify(swap);
     await SWAPS_DB.put(swapHash, swapJson);
+    console.log(`ADDED SWAP ${swapHash} TO SWAPS_DB`);
 
     const response = {
       message: 'Swap Prepared',

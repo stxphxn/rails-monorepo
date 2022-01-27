@@ -17,22 +17,22 @@ export const fulfil = async (request: Request): Promise<Response> => {
   }
   const body: FulfilSwapRequestBody = await request.json();
   const { swapHash } = body;
-  console.log(swapHash);
   try {
     const json = await SWAPS_DB.get(swapHash);
     const swap = JSON.parse(json);
-    console.log(swap);
+
     if (!swap) throw Error('Swap not found');
     if (swap.status !== 'PREPARE') throw Error('Swap already fulfiled or cancelled');
     // fetch seller consent token
     const { consent, accountInfo: { id } } = JSON.parse(await SELLERS_DB.get(swap.swapInfo.seller));
-    console.log(id);
+    console.log(`FETCHED ACCOUNT INFO FOR ${swap.swapInfo.seller} FROM SELLERS_DB`)
+
     // check for payment transaction
     const received = await checkTransaction(
       consent,
       id,  
       swapHash, 
-      swap.paymentDetails.paymentRequest.amount.amount);
+      swap.paymentDetails.amount.amount);
     if (!received) {
       throw new Error('Payment not found');
     }
@@ -42,10 +42,13 @@ export const fulfil = async (request: Request): Promise<Response> => {
     // send tx
     const fulfilTx = await escrow.fulfil(swap.swapData, signature);
     const receipt = await fulfilTx.wait();
-    
+    console.log(`CALLED FULFIL ON ESCROW CONTRACT`);
+
     // Update swap status
     swap.status = 'FULFIL';
     await SWAPS_DB.put(swapHash, JSON.stringify(swap));
+    console.log(`UPDATED STATUS TO FULFILED IN SWAPS_DB`);
+
     
     // response object  
     const response = {
